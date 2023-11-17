@@ -53,6 +53,7 @@ public class ProguardTask extends BaritoneGradleTask {
 
     private File mixin;
 
+
     @TaskAction
     protected void exec() throws Exception {
         super.verifyArtifacts();
@@ -69,11 +70,14 @@ public class ProguardTask extends BaritoneGradleTask {
     }
 
     private void processArtifact() throws Exception {
+        /*
         if (Files.exists(this.artifactUnoptimizedPath)) {
             Files.delete(this.artifactUnoptimizedPath);
         }
 
-        Determinizer.determinize(this.artifactPath.toString(), this.artifactUnoptimizedPath.toString(), Optional.empty());
+         */
+
+        Determinizer.determinize(this.artifactPath.toString(), this.artifactUnoptimizedPath.toString(), Optional.ofNullable(mixin));
     }
 
     private void downloadProguard() throws Exception {
