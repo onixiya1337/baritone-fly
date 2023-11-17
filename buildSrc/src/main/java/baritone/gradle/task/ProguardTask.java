@@ -64,20 +64,24 @@ public class ProguardTask extends BaritoneGradleTask {
         extractProguard();
         generateConfigs();
         acquireDependencies();
+        processDeobf();
         proguardApi();
         proguardStandalone();
         cleanup();
     }
 
+    private void processDeobf() throws Exception {
+        Path tempPath = getTemporaryFile(ARTIFACT_DEOBF);
+        Files.copy(this.artifactDeobfPath, tempPath, REPLACE_EXISTING);
+        Determinizer.determinizeObfed(tempPath.toString(), this.artifactDeobfPath.toString(), Optional.ofNullable(mixin));
+    }
+
     private void processArtifact() throws Exception {
-        /*
         if (Files.exists(this.artifactUnoptimizedPath)) {
             Files.delete(this.artifactUnoptimizedPath);
         }
 
-         */
-
-        Determinizer.determinize(this.artifactPath.toString(), this.artifactUnoptimizedPath.toString(), Optional.ofNullable(mixin));
+        Determinizer.determinize(this.artifactPath.toString(), this.artifactUnoptimizedPath.toString(), Optional.empty());
     }
 
     private void downloadProguard() throws Exception {
