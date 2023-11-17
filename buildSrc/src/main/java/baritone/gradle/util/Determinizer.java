@@ -107,7 +107,8 @@ public class Determinizer {
                     ByteArrayOutputStream cancer = new ByteArrayOutputStream();
                     copy(jarFile.getInputStream(entry), cancer);
                     String manifest = new String(cancer.toByteArray());
-                    manifest += "MixinConfigs: mixins.baritone.json\n" +
+                    manifest = "Manifest-Version: 1.0\n" +
+                            "MixinConfigs: mixins.baritone.json\n" +
                             "Implementation-Title: Baritone\n" +
                             "Implementation-Version: 1.0.0\n" +
                             "TweakClass: org.spongepowered.asm.launch.MixinTweaker";
