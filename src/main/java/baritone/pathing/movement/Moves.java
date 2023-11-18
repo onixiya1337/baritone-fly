@@ -1,11 +1,9 @@
 package baritone.pathing.movement;
 
 import baritone.api.utils.BetterBlockPos;
-import baritone.pathing.movement.movements.MovementAscend;
-import baritone.pathing.movement.movements.MovementDescend;
-import baritone.pathing.movement.movements.MovementFall;
-import baritone.pathing.movement.movements.MovementTraverse;
+import baritone.pathing.movement.movements.*;
 import baritone.utils.pathing.MutableMoveResult;
+import net.minecraft.util.EnumFacing;
 
 public enum Moves {
     TRAVERSE_NORTH(0, 0, -1) {
@@ -168,14 +166,13 @@ public enum Moves {
         public void apply(CalculationContext context, int x, int y, int z, MutableMoveResult result) {
             MovementDescend.cost(context, x, y, z, x, z + 1, result);
         }
-    };
-    /*
+    },
     DIAGONAL_NORTHEAST(+1, 0, -1, false, true) {
         @Override
         public Movement apply0(CalculationContext context, BetterBlockPos src) {
             MutableMoveResult res = new MutableMoveResult();
             apply(context, src.x, src.y, src.z, res);
-            return new MovementDiagonal(context.getPathy(), src, EnumFacing.NORTH, EnumFacing.EAST, res.y - src.y);
+            return new MovementDiagonal(context.getBaritone(), src, EnumFacing.NORTH, EnumFacing.EAST, res.y - src.y);
         }
 
         @Override
@@ -189,7 +186,7 @@ public enum Moves {
         public Movement apply0(CalculationContext context, BetterBlockPos src) {
             MutableMoveResult res = new MutableMoveResult();
             apply(context, src.x, src.y, src.z, res);
-            return new MovementDiagonal(context.getPathy(), src, EnumFacing.NORTH, EnumFacing.WEST, res.y - src.y);
+            return new MovementDiagonal(context.getBaritone(), src, EnumFacing.NORTH, EnumFacing.WEST, res.y - src.y);
         }
 
         @Override
@@ -202,7 +199,7 @@ public enum Moves {
         public Movement apply0(CalculationContext context, BetterBlockPos src) {
             MutableMoveResult res = new MutableMoveResult();
             apply(context, src.x, src.y, src.z, res);
-            return new MovementDiagonal(context.getPathy(), src, EnumFacing.SOUTH, EnumFacing.EAST, res.y - src.y);
+            return new MovementDiagonal(context.getBaritone(), src, EnumFacing.SOUTH, EnumFacing.EAST, res.y - src.y);
         }
 
         @Override
@@ -215,7 +212,7 @@ public enum Moves {
         public Movement apply0(CalculationContext context, BetterBlockPos src) {
             MutableMoveResult res = new MutableMoveResult();
             apply(context, src.x, src.y, src.z, res);
-            return new MovementDiagonal(context.getPathy(), src, EnumFacing.SOUTH, EnumFacing.WEST, res.y - src.y);
+            return new MovementDiagonal(context.getBaritone(), src, EnumFacing.SOUTH, EnumFacing.WEST, res.y - src.y);
         }
 
         @Override
@@ -224,7 +221,7 @@ public enum Moves {
         }
     }
     ;
-     */
+
 
     public final boolean dynamicXZ;
     public final boolean dynamicY;

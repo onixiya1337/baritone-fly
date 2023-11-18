@@ -20,6 +20,8 @@ public class CalculationContext {
     public final BlockStateInterface bsi;
     public final boolean canSprint;
     public final boolean assumeWalkOnWater;
+    public final boolean allowDiagonalDescend;
+    public final boolean allowDiagonalAscend;
     public final boolean allowDownward;
     public final int maxFallHeightNoWater;
     public final double waterWalkSpeed;
@@ -43,6 +45,8 @@ public class CalculationContext {
         this.bsi = new BlockStateInterface(baritone.getPlayerContext(), forUseOnAnotherThread);
         this.canSprint = Baritone.settings().allowSprint.value && player.getFoodStats().getFoodLevel() > 6;
         this.assumeWalkOnWater = Baritone.settings().assumeWalkOnWater.value;
+        this.allowDiagonalDescend = Baritone.settings().allowDiagonalDescend.value;
+        this.allowDiagonalAscend = Baritone.settings().allowDiagonalAscend.value;
         this.allowDownward = Baritone.settings().allowDownward.value;
         this.maxFallHeightNoWater = Baritone.settings().maxFallHeightNoWater.value;
         int depth = EnchantmentHelper.getDepthStriderModifier(player);

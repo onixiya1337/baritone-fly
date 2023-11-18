@@ -179,7 +179,7 @@ public class MovementDescend extends Movement {
 
             Vec3 destCenter = new Vec3(destX, dest.getY(), destZ);
             MovementHelper.rotate(ctx, state, src, destCenter);
-            MovementHelper.setInputs(ctx, state, destCenter);
+            MovementHelper.setInputs(ctx, state, destCenter, getValidPositions());
 
             //TODO:  Move towards destX, dest.getY(), destZ
             return state;
@@ -195,12 +195,12 @@ public class MovementDescend extends Movement {
             if (numTicks++ < 20 && fromStart < 1.25) {
                 Vec3 destCenter = VecUtils.getBlockPosCenter(fakeDest);
                 MovementHelper.rotate(ctx, state, src, destCenter);
-                MovementHelper.setInputs(ctx, state, destCenter);
+                MovementHelper.setInputs(ctx, state, destCenter, getValidPositions());
                 //TODO:  move towards fake dest
             } else {
                 Vec3 destCenter = VecUtils.getBlockPosCenter(dest);
                 MovementHelper.rotate(ctx, state, src, destCenter);
-                MovementHelper.setInputs(ctx, state, destCenter);
+                MovementHelper.setInputs(ctx, state, destCenter, getValidPositions());
                 //TODO:  move towards dest
             }
         }

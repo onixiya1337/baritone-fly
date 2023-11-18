@@ -24,6 +24,10 @@ public class Settings {
 
     //TODO: Smooth look settings
 
+    public final Setting<Boolean> allowDiagonalDescend = new Setting<>(false);
+
+    public final Setting<Boolean> allowDiagonalAscend = new Setting<>(false);
+
     public final Setting<Integer> rightClickSpeed = new Setting<>(4);
 
     public final Setting<Double> walkOnWaterOnePenalty = new Setting<>(3D);
@@ -64,7 +68,7 @@ public class Settings {
             // Leave Empty by Default
     ));
 
-    public final Setting<Boolean> sprintInWater = new Setting<>(true);
+    public final Setting<Boolean> sprintInWater = new Setting<>(false);
 
     public final Setting<Boolean> overshootTraverse = new Setting<>(true);
 

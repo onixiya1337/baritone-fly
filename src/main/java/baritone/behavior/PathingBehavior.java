@@ -3,6 +3,7 @@ package baritone.behavior;
 import baritone.Baritone;
 import baritone.api.behavior.IPathingBehavior;
 import baritone.api.event.events.RenderEvent;
+import baritone.api.event.events.SprintStateEvent;
 import baritone.api.event.events.TickEvent;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.goals.Goal;
@@ -154,6 +155,13 @@ public class PathingBehavior extends Behavior implements IPathingBehavior, Helpe
 
                 findPath(current.getPath().getDest());
             }
+        }
+    }
+
+    @Override
+    public void onPlayerSprintState(SprintStateEvent event) {
+        if (isPathing()) {
+            event.setState(current.isSprinting());
         }
     }
 

@@ -10,10 +10,14 @@ import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Helper;
 import baritone.api.utils.IPlayerContext;
 import baritone.api.utils.VecUtils;
+import baritone.api.utils.input.Input;
 import baritone.behavior.PathingBehavior;
+import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
-import baritone.pathing.movement.movements.MovementFall;
+import baritone.pathing.movement.MovementHelper;
+import baritone.pathing.movement.movements.*;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.Vec3;
 
 public class PathExecutor implements IPathExecutor, Helper {
 
@@ -29,6 +33,7 @@ public class PathExecutor implements IPathExecutor, Helper {
     private Double movementCost;
     private Integer costEstimateIndex;
     private boolean failed;
+    private boolean sprintNextTick = true;
 
     private final PathingBehavior behavior;
     private final IPlayerContext ctx;
@@ -146,6 +151,10 @@ public class PathExecutor implements IPathExecutor, Helper {
             onTick();
             return true;
         } else {
+            sprintNextTick = shouldSprintNextTick();
+            if (!sprintNextTick) {
+                ctx.player().setSprinting(false);
+            }
             ticksOnCurrent++;
 
             if (ticksOnCurrent > movementCost + Baritone.settings().movementTimeoutTicks.value) {
@@ -155,6 +164,47 @@ public class PathExecutor implements IPathExecutor, Helper {
             }
         }
         return movement.safeToCancel();
+    }
+
+    private boolean shouldSprintNextTick() {
+        boolean requested = behavior.baritone.getInputOverrideHandler().isInputForcedDown(Input.SPRINT);
+
+        behavior.baritone.getInputOverrideHandler().setInputForceState(Input.SPRINT, false);
+
+        if (!new CalculationContext(behavior.baritone, false).canSprint) {
+            return false;
+        }
+
+        if (pathPosition >= path.length() - 2) {
+            return false;
+        }
+
+        if (requested) {
+            return true;
+        }
+
+        IMovement current = path.movements().get(pathPosition);
+
+        if (current instanceof MovementDescend || current instanceof MovementAscend || current instanceof MovementFall) {
+            return false;
+        }
+
+        IMovement next = path.movements().get(pathPosition + 1);
+
+        if (current instanceof MovementDiagonal || current instanceof MovementTraverse) {
+            if (current.getDest().y != current.getSrc().y) {
+                return false;
+            }
+
+            if (next instanceof MovementDescend || next instanceof MovementAscend || next instanceof MovementFall) {
+                return false;
+            }
+
+
+            return true;
+        }
+
+        return false;
     }
 
     private BlockPos closestPathPos() {
@@ -209,5 +259,9 @@ public class PathExecutor implements IPathExecutor, Helper {
 
     public boolean failed() {
         return failed;
+    }
+
+    public boolean isSprinting() {
+        return sprintNextTick;
     }
 }

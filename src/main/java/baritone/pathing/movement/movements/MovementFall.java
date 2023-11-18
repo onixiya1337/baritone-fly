@@ -88,7 +88,7 @@ public class MovementFall extends Movement {
                 state.setInput(Input.SNEAK, true);
             }
 
-            MovementHelper.setInputs(ctx, state, destCenter);
+            MovementHelper.setInputs(ctx, state, destCenter, getValidPositions());
             //TODO:  Move towards (only keys) dest
         }
         Vec3i avoid = Optional.ofNullable(avoid()).map(EnumFacing::getDirectionVec).orElse(null);
@@ -97,7 +97,7 @@ public class MovementFall extends Movement {
         } else {
             double dist = Math.abs(avoid.getX() * (destCenter.xCoord - avoid.getX() / 2.0 - ctx.playerFeetAsVec().xCoord)) + Math.abs(avoid.getZ() * (destCenter.zCoord - avoid.getZ() / 2.0 - ctx.playerFeetAsVec().zCoord));
             if (dist < 0.6) {
-                MovementHelper.setInputs(ctx, state, destCenter);
+                MovementHelper.setInputs(ctx, state, destCenter, getValidPositions());
                 //TODO:  move towards (only keys) dest
             } else if (!ctx.player().onGround) {
                 state.setInput(Input.SNEAK, false);
@@ -106,7 +106,7 @@ public class MovementFall extends Movement {
 
         Vec3 destCenterOffset = new Vec3(destCenter.xCoord + 0.125 * avoid.getX(), destCenter.yCoord, destCenter.zCoord + 0.125 * avoid.getZ());
         MovementHelper.rotate(ctx, state, src, destCenterOffset);
-        MovementHelper.setInputs(ctx, state, destCenterOffset);
+        MovementHelper.setInputs(ctx, state, destCenterOffset, getValidPositions());
         //TODO:  move towards destCenterOffset
 
         return state;

@@ -399,7 +399,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         ));
     }
 
-    static void setInputs(IPlayerContext ctx, MovementState state, Vec3 dest) {
+    static void setInputs(IPlayerContext ctx, MovementState state, Vec3 dest, Set<BetterBlockPos> validPositions) {
 
         PlayerSimulation simulation = new PlayerSimulation(ctx.world());
 
@@ -414,6 +414,10 @@ public interface MovementHelper extends ActionCosts, Helper {
 
             simulation.copy(ctx.player());
             Vec3 prediction = movement.pred(simulation, ctx);
+
+            if (!validPositions.contains(new BetterBlockPos(prediction.xCoord, prediction.yCoord, prediction.zCoord))) {
+                continue;
+            }
 
             double distance = prediction.distanceTo(dest);
 

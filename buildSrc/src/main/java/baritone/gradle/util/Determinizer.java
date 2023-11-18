@@ -44,24 +44,16 @@ public class Determinizer {
                     ByteArrayOutputStream cancer = new ByteArrayOutputStream();
                     copy(jarFile.getInputStream(entry), cancer);
                     String manifest = new String(cancer.toByteArray());
-                    if (outputPath.contains("deobf")) {
-                        manifest += "MixinConfigs: mixins.baritone.json\n" +
-                                "Implementation-Title: Baritone\n" +
-                                "Implementation-Version: 1.0.0\n" +
-                                "TweakClass: baritone.launch.BaritoneTweaker";
-                    }
                     if (!manifest.contains("baritone.launch.BaritoneTweaker")) {
                         throw new IllegalStateException("unable to replace");
                     }
-                    System.out.println("ReplacingTweaker " + outputPath);
-                    System.out.println("" + manifest);
                     manifest = manifest.replace("baritone.launch.BaritoneTweaker", "org.spongepowered.asm.launch.MixinTweaker");
                     jos.write(manifest.getBytes());
                 } else {
                     copy(jarFile.getInputStream(entry), jos);
                 }
             }
-            if (toInclude.isPresent() && !outputPath.contains("deobf")) {
+            if (toInclude.isPresent()) {
                 try (JarFile mixin = new JarFile(toInclude.get())) {
                     for (JarEntry entry : mixin.stream().sorted(Comparator.comparing(JarEntry::getName)).collect(Collectors.toList())) {
                         if (entry.getName().startsWith("META-INF") && !entry.getName().startsWith("META-INF/services")) {
@@ -70,51 +62,6 @@ public class Determinizer {
                         jos.putNextEntry(entry);
                         copy(mixin.getInputStream(entry), jos);
                     }
-                }
-            }
-            jos.finish();
-        }
-    }
-
-    public static void determinizeObfed(String inputPath, String outputPath, Optional<File> toInclude) throws IOException {
-        System.out.println("Running Determinizer for Obfed");
-        System.out.println(" Input path: " + inputPath);
-        System.out.println(" Output path: " + outputPath);
-
-        try (
-                JarFile jarFile = new JarFile(new File(inputPath));
-                JarOutputStream jos = new JarOutputStream(new FileOutputStream(new File(outputPath)))
-        ) {
-
-            List<JarEntry> entries = jarFile.stream()
-                    .sorted(Comparator.comparing(JarEntry::getName))
-                    .collect(Collectors.toList());
-
-            for (JarEntry entry : entries) {
-                if (entry.getName().equals("META-INF/fml_cache_annotation.json")) {
-                    continue;
-                }
-                if (entry.getName().equals("META-INF/fml_cache_class_versions.json")) {
-                    continue;
-                }
-                JarEntry clone = new JarEntry(entry.getName());
-                clone.setTime(42069);
-                jos.putNextEntry(clone);
-                if (entry.getName().endsWith(".refmap.json")) {
-                    JsonObject object = new JsonParser().parse(new InputStreamReader(jarFile.getInputStream(entry))).getAsJsonObject();
-                    jos.write(writeSorted(object).getBytes());
-                } else if (entry.getName().equals("META-INF/MANIFEST.MF") && toInclude.isPresent()) {
-                    ByteArrayOutputStream cancer = new ByteArrayOutputStream();
-                    copy(jarFile.getInputStream(entry), cancer);
-                    String manifest = new String(cancer.toByteArray());
-                    manifest = "Manifest-Version: 1.0\n" +
-                            "MixinConfigs: mixins.baritone.json\n" +
-                            "Implementation-Title: Baritone\n" +
-                            "Implementation-Version: 1.0.0\n" +
-                            "TweakClass: org.spongepowered.asm.launch.MixinTweaker";
-                    jos.write(manifest.getBytes());
-                } else {
-                    copy(jarFile.getInputStream(entry), jos);
                 }
             }
             jos.finish();
