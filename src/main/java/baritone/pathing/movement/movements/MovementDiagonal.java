@@ -237,7 +237,7 @@ public class MovementDiagonal extends Movement {
         }
         Vec3 destCenter = VecUtils.getBlockPosCenter(dest);
         MovementHelper.rotate(ctx, state, src, destCenter);
-        MovementHelper.setInputs(ctx, state, destCenter, getValidPositions());
+        MovementHelper.setInputs(ctx, state, destCenter);
 
         return state;
     }

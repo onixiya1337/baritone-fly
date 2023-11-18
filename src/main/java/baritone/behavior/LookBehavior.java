@@ -162,11 +162,11 @@ public class LookBehavior extends Behavior implements ILookBehavior {
             this.ctx = ctx;
             this.rand = new ForkableRandom();
             this.yawInterpolator = new Interpolator(
-                    20,
+                    Baritone.settings().yawRotationTimeTicks.value,
                     new CubicBezier(0.85, 0, 0.15, 1)
             );
             this.pitchInterpolator = new Interpolator(
-                    25,
+                    Baritone.settings().pitchRotationTimeTicks.value,
                     new CubicBezier(0.22, 1, 0.36, 1)
             );
         }

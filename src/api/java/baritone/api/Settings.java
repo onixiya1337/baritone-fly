@@ -24,6 +24,10 @@ public class Settings {
 
     //TODO: Smooth look settings
 
+    public final Setting<Integer> yawRotationTimeTicks = new Setting<>(20);
+
+    public final Setting<Integer> pitchRotationTimeTicks = new Setting<>(25);
+
     public final Setting<Boolean> safeMode = new Setting<>(true);
 
     public final Setting<Boolean> allowDiagonalDescend = new Setting<>(false);

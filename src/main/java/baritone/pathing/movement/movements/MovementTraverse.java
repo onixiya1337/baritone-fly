@@ -166,7 +166,7 @@ public class MovementTraverse extends Movement {
 
         Vec3 destCenter = VecUtils.getBlockPosCenter(against);
         MovementHelper.rotate(ctx, state, src, destCenter);
-        MovementHelper.setInputs(ctx, state, destCenter, getValidPositions());
+        MovementHelper.setInputs(ctx, state, destCenter);
 
         return state;
     }
