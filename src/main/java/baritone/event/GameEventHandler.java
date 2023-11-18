@@ -41,12 +41,6 @@ public class GameEventHandler implements IEventBus {
         } else {
             baritone.bsi = null;
         }
-
-        if (baritone.getPlayerContext().minecraft().gameSettings.keyBindSneak.isPressed()) {
-            BetterBlockPos feet = baritone.getPlayerContext().playerFeet();
-            baritone.getPathingBehavior().setGoal(new GoalXZ(feet.x + 50, feet.z + 35));
-            baritone.getPathingBehavior().findPath(feet);
-        }
         listeners.forEach(l -> l.onTick(event));
     }
 
