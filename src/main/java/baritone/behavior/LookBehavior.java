@@ -39,7 +39,6 @@ public class LookBehavior extends Behavior implements ILookBehavior {
             this.processor = new AimProcessor(ctx);
         }
         target = new Target(ctx.playerRotations(), rotation, Target.Mode.resolve(blockInteract));
-        System.out.println(target.rotation);
     }
 
     @Override

@@ -17,6 +17,7 @@ import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.movements.*;
+import baritone.utils.InputOverrideHandler;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
@@ -152,9 +153,16 @@ public class PathExecutor implements IPathExecutor, Helper {
             onTick();
             return true;
         } else {
-            sprintNextTick = shouldSprintNextTick();
-            if (!sprintNextTick) {
-                ctx.player().setSprinting(false);
+            if (BaritoneAPI.getSettings().safeMode.value && movement instanceof MovementDescend) {
+                ((MovementDescend) movement).forceSafeMode();
+            }
+            if (decrease()) {
+                MovementHelper.decreaseMotion(behavior.baritone.getInputOverrideHandler(), ctx);
+            } else {
+                sprintNextTick = shouldSprintNextTick();
+                if (!sprintNextTick) {
+                    ctx.player().setSprinting(false);
+                }
             }
             ticksOnCurrent++;
 
@@ -211,6 +219,67 @@ public class PathExecutor implements IPathExecutor, Helper {
         }
 
         return false;
+    }
+
+    private boolean decrease() {
+        if (!BaritoneAPI.getSettings().safeMode.value) {
+            return false;
+        }
+
+        IMovement current = path.movements().get(pathPosition);
+
+        if (current instanceof MovementDiagonal) {
+            if (current.getDest().y != current.getSrc().y) {
+                return false;
+            }
+        }
+
+        IPlayerContext ctx = behavior.ctx;
+
+        if (current instanceof MovementAscend || current instanceof MovementDescend) {
+            return ctx.playerFeet().equals(current.getSrc()) && ctx.playerMotion().lengthVector() > 0.15;
+        }
+
+        if (pathPosition < path.length() - 3) {
+            if (ctx.playerMotion().lengthVector() < 0.15) {
+                return false;
+            }
+
+            IMovement next = path.movements().get(pathPosition + 1);
+
+            if (current.getDirection().equals(next.getDirection())) {
+                return false;
+            }
+
+            if (next instanceof MovementAscend || next instanceof MovementDescend) {
+                return true;
+            }
+
+            if (next instanceof MovementDiagonal) {
+                if (next.getDest().y != next.getSrc().y) {
+                    return true;
+                }
+            }
+
+            if (BaritoneAPI.getSettings().safeMode.value) {
+                IMovement nextNext = path.movements().get(pathPosition + 2);
+
+                if (next.getDirection().equals(nextNext.getDirection())) {
+                    return false;
+                }
+
+                if (nextNext instanceof MovementAscend || nextNext instanceof MovementDescend) {
+                    return true;
+                }
+
+                if (nextNext instanceof MovementDiagonal) {
+                    return nextNext.getDest().y != nextNext.getSrc().y;
+                }
+            }
+            return false;
+        }
+
+        return ctx.playerMotion().lengthVector() > 0.2;
     }
 
     private BlockPos closestPathPos() {
