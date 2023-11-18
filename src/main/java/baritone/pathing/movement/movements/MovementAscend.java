@@ -105,7 +105,7 @@ public class MovementAscend extends Movement {
         }
 
         Vec3 destCenter = VecUtils.getBlockPosCenter(dest);
-        MovementHelper.rotate(ctx, state, src, destCenter);
+        MovementHelper.rotate(ctx, state, destCenter);
         MovementHelper.setInputs(ctx, state, destCenter);
         //TODO: Move towards dest
 

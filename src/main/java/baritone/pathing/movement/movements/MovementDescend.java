@@ -178,7 +178,7 @@ public class MovementDescend extends Movement {
             double destZ = (src.getZ() + 0.5) * 0.17 + (dest.getZ() + 0.5) * 0.83;
 
             Vec3 destCenter = new Vec3(destX, dest.getY(), destZ);
-            MovementHelper.rotate(ctx, state, src, destCenter);
+            MovementHelper.rotate(ctx, state, destCenter);
             MovementHelper.setInputs(ctx, state, destCenter);
 
             //TODO:  Move towards destX, dest.getY(), destZ
@@ -194,12 +194,12 @@ public class MovementDescend extends Movement {
         if (!playerFeet.equals(dest) || ab > 0.25) {
             if (numTicks++ < 20 && fromStart < 1.25) {
                 Vec3 destCenter = VecUtils.getBlockPosCenter(fakeDest);
-                MovementHelper.rotate(ctx, state, src, destCenter);
+                MovementHelper.rotate(ctx, state, destCenter);
                 MovementHelper.setInputs(ctx, state, destCenter);
                 //TODO:  move towards fake dest
             } else {
                 Vec3 destCenter = VecUtils.getBlockPosCenter(dest);
-                MovementHelper.rotate(ctx, state, src, destCenter);
+                MovementHelper.rotate(ctx, state, destCenter);
                 MovementHelper.setInputs(ctx, state, destCenter);
                 //TODO:  move towards dest
             }
