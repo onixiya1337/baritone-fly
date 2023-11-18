@@ -1,6 +1,7 @@
 package baritone.pathing.path;
 
 import baritone.Baritone;
+import baritone.api.BaritoneAPI;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.movement.ActionCosts;
 import baritone.api.pathing.movement.IMovement;
@@ -175,7 +176,7 @@ public class PathExecutor implements IPathExecutor, Helper {
             return false;
         }
 
-        if (pathPosition >= path.length() - 2) {
+        if (pathPosition >= path.length() - 3) {
             return false;
         }
 
@@ -190,6 +191,7 @@ public class PathExecutor implements IPathExecutor, Helper {
         }
 
         IMovement next = path.movements().get(pathPosition + 1);
+        IMovement nextNext = path.movements().get(pathPosition + 2);
 
         if (current instanceof MovementDiagonal || current instanceof MovementTraverse) {
             if (current.getDest().y != current.getSrc().y) {
@@ -197,6 +199,10 @@ public class PathExecutor implements IPathExecutor, Helper {
             }
 
             if (next instanceof MovementDescend || next instanceof MovementAscend || next instanceof MovementFall) {
+                return false;
+            }
+
+            if (BaritoneAPI.getSettings().safeMode.value && (nextNext instanceof MovementDescend || nextNext instanceof MovementAscend || nextNext instanceof MovementFall)) {
                 return false;
             }
 

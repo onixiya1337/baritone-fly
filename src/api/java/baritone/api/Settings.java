@@ -24,6 +24,8 @@ public class Settings {
 
     //TODO: Smooth look settings
 
+    public final Setting<Boolean> safeMode = new Setting<>(true);
+
     public final Setting<Boolean> allowDiagonalDescend = new Setting<>(false);
 
     public final Setting<Boolean> allowDiagonalAscend = new Setting<>(false);
