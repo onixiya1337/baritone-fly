@@ -68,6 +68,9 @@ public class MovementAscend extends Movement {
 
         boolean jumpingFromBottomSlab = MovementHelper.isBottomSlab(srcDown);
         boolean jumpingToBottomSlab = MovementHelper.isBottomSlab(destOn);
+        if (jumpingFromBottomSlab && !jumpingToBottomSlab) {
+            return COST_INF;
+        }
 
         double cost;
         if (jumpingToBottomSlab) {

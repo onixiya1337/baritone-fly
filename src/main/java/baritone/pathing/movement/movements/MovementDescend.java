@@ -191,7 +191,7 @@ public class MovementDescend extends Movement {
         double x = ctx.playerFeetAsVec().xCoord - (src.getX() + 0.5);
         double z = ctx.playerFeetAsVec().zCoord - (src.getZ() + 0.5);
         double fromStart = Math.sqrt(x * x + z * z);
-        if (!playerFeet.equals(dest) || ab > 0.25) {
+        if (!playerFeet.equals(dest) || ab > 0.24) {
             if (numTicks++ < 20 && fromStart < 1.25) {
                 Vec3 destCenter = VecUtils.getBlockPosCenter(fakeDest);
                 MovementHelper.rotate(ctx, state, destCenter);
