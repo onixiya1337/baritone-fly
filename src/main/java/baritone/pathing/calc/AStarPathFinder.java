@@ -46,8 +46,6 @@ public class AStarPathFinder {
 
         openSet.add(startNode);
 
-        int iterations = 0;
-
         int numEmptyChunk = 0;
         int pathingMaxChunkBorderFetch = Baritone.settings().pathingMaxChunkBorderFetch.value;
 
@@ -59,8 +57,6 @@ public class AStarPathFinder {
         PathNode current = null;
 
         while (!openSet.isEmpty() && numEmptyChunk < pathingMaxChunkBorderFetch) {
-            iterations++;
-            System.out.println(iterations);
             current = openSet.get(0);
             for (int i = 1; i < openSet.size(); i++) {
                 if (openSet.get(i).fCost() < current.fCost() || openSet.get(i).fCost() == current.fCost() && openSet.get(i).hCost < current.hCost)
