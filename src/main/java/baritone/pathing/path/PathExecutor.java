@@ -23,8 +23,8 @@ import net.minecraft.util.Vec3;
 
 public class PathExecutor implements IPathExecutor, Helper {
 
-    private static final double MAX_MAX_DIST_FROM_PATH = 4;
-    private static final double MAX_DIST_FROM_PATH = 3;
+    private static final double MAX_MAX_DIST_FROM_PATH = 5;
+    private static final double MAX_DIST_FROM_PATH = 4;
 
     private static final double MAX_TICKS_AWAY = 200;
 
