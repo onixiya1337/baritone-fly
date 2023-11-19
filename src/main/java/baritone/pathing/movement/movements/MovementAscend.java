@@ -109,7 +109,7 @@ public class MovementAscend extends Movement {
 
         Vec3 destCenter = VecUtils.getBlockPosCenter(dest);
         MovementHelper.rotate(ctx, state, destCenter);
-        MovementHelper.setInputs(ctx, state, destCenter);
+        MovementHelper.setInputsAccurate(ctx, state, destCenter);
         //TODO: Move towards dest
 
         IBlockState jumpingOnto = BlockStateInterface.get(ctx, dest.down());

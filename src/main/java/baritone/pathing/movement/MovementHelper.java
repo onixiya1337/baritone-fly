@@ -440,6 +440,42 @@ public interface MovementHelper extends ActionCosts, Helper {
         }
     }
 
+    static void setInputsAccurate(IPlayerContext ctx, MovementState state, Vec3 dest) {
+        PlayerSimulation simulation = new PlayerSimulation(ctx.world());
+
+        HorizontalMovements[] movements = HorizontalMovements.values();
+
+        Tuple<HorizontalMovements, Double> closest = null;
+
+        for (HorizontalMovements movement : movements) {
+            if (!Baritone.settings().allowSprint.value && Arrays.asList(movement.getKeys()).contains(Input.SPRINT)) {
+                continue;
+            }
+
+            for (HorizontalMovements nextMovement : movements) {
+                if (!Baritone.settings().allowSprint.value && Arrays.asList(nextMovement.getKeys()).contains(Input.SPRINT)) {
+                    continue;
+                }
+
+                simulation.copy(ctx.player());
+                movement.pred(simulation, ctx);
+                Vec3 prediction = nextMovement.pred(simulation, ctx);
+
+                double distance = prediction.distanceTo(dest);
+
+                if (closest == null || distance < closest.getSecond()) {
+                    closest = new Tuple<>(movement, distance);
+                }
+            }
+        }
+
+        if (closest != null) {
+            for (Input input : closest.getFirst().getKeys()) {
+                state.setInput(input, true);
+            }
+        }
+    }
+
     static void decreaseMotion(InputOverrideHandler handler, IPlayerContext ctx) {
         PlayerSimulation simulation = new PlayerSimulation(ctx.world());
 
