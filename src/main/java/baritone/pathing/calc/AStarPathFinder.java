@@ -5,130 +5,142 @@ import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.movement.ActionCosts;
 import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.Helper;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Moves;
 import baritone.utils.pathing.MutableMoveResult;
-import net.minecraft.util.BlockPos;
+import baritone.pathing.calc.openset.BinaryHeapOpenSet;
+import baritone.utils.pathing.BetterWorldBorder;
 
-import java.util.*;
+import java.util.Optional;
 
-public class AStarPathFinder {
+public final class AStarPathFinder extends AbstractNodeCostSearch {
 
-    private final CalculationContext context;
-    private final int startX;
-    private final int startY;
-    private final int startZ;
-    private final Goal goal;
+    private final CalculationContext calcContext;
 
-    public AStarPathFinder(BetterBlockPos start, Goal goal, CalculationContext context) {
-        this.context = context;
-        this.startX = start.x;
-        this.startY = start.y;
-        this.startZ = start.z;
-        this.goal = goal;
+    public AStarPathFinder(int startX, int startY, int startZ, Goal goal, CalculationContext context) {
+        super(startX, startY, startZ, goal, context);
+        this.calcContext = context;
     }
 
-    public AStarPathFinder(BlockPos start, Goal goal, CalculationContext context) {
-        this(new BetterBlockPos(start), goal, context);
-    }
-
-    public Optional<IPath> pathFind() {
-
-        Moves[] allMoves = Moves.values();
-
+    @Override
+    protected Optional<IPath> calculate0(long primaryTimeout, long failureTimeout) {
+        startNode = getNodeAtPosition(startX, startY, startZ, BetterBlockPos.longHash(startX, startY, startZ));
+        startNode.cost = 0;
+        startNode.combinedCost = startNode.estimatedCostToGoal;
+        BinaryHeapOpenSet openSet = new BinaryHeapOpenSet();
+        openSet.insert(startNode);
+        double[] bestHeuristicSoFar = new double[COEFFICIENTS.length];
+        for (int i = 0; i < bestHeuristicSoFar.length; i++) {
+            bestHeuristicSoFar[i] = startNode.estimatedCostToGoal;
+            bestSoFar[i] = startNode;
+        }
         MutableMoveResult res = new MutableMoveResult();
-
-        PathNode startNode = new PathNode(startX, startY, startZ);
-
-        List<PathNode> openSet = new ArrayList<>();
-        Set<PathNode> closedSet = new HashSet<>();
-
-        openSet.add(startNode);
-
-        int numEmptyChunk = 0;
-        int pathingMaxChunkBorderFetch = Baritone.settings().pathingMaxChunkBorderFetch.value;
-
-        int numNodes = 0;
-        int numMovements = 0;
-
+        BetterWorldBorder worldBorder = new BetterWorldBorder(calcContext.world.getWorldBorder());
         long startTime = System.currentTimeMillis();
-
-        PathNode current = null;
-
-        while (!openSet.isEmpty() && numEmptyChunk < pathingMaxChunkBorderFetch) {
-            current = openSet.get(0);
-            for (int i = 1; i < openSet.size(); i++) {
-                if (openSet.get(i).fCost() < current.fCost() || openSet.get(i).fCost() == current.fCost() && openSet.get(i).hCost < current.hCost)
-                    current = openSet.get(i);
+        boolean slowPath = Baritone.settings().slowPath.value;
+        if (slowPath) {
+            logDebug("slowPath is on, path timeout will be " + Baritone.settings().slowPathTimeoutMS.value + "ms instead of " + primaryTimeout + "ms");
+        }
+        long primaryTimeoutTime = startTime + (slowPath ? Baritone.settings().slowPathTimeoutMS.value : primaryTimeout);
+        long failureTimeoutTime = startTime + (slowPath ? Baritone.settings().slowPathTimeoutMS.value : failureTimeout);
+        boolean failing = true;
+        int numNodes = 0;
+        int numMovementsConsidered = 0;
+        int numEmptyChunk = 0;
+        int timeCheckInterval = 1 << 6;
+        int pathingMaxChunkBorderFetch = Baritone.settings().pathingMaxChunkBorderFetch.value;
+        double minimumImprovement = Baritone.settings().minimumImprovementRepropagation.value ? MIN_IMPROVEMENT : 0;
+        Moves[] allMoves = Moves.values();
+        while (!openSet.isEmpty() && numEmptyChunk < pathingMaxChunkBorderFetch && !cancelRequested) {
+            if ((numNodes & (timeCheckInterval - 1)) == 0) {
+                long now = System.currentTimeMillis();
+                if (now - failureTimeoutTime >= 0 || (!failing && now - primaryTimeoutTime >= 0)) {
+                    break;
+                }
             }
-
-            openSet.remove(current);
-            closedSet.add(current);
-
+            if (slowPath) {
+                try {
+                    Thread.sleep(Baritone.settings().slowPathTimeDelayMS.value);
+                } catch (InterruptedException ignored) {}
+            }
+            PathNode currentNode = openSet.removeLowest();
+            mostRecentConsidered = currentNode;
             numNodes++;
-
-            if (goal.isInGoal(current.x, current.y, current.z)) {
-                Helper.HELPER.logDebug("Took " + (System.currentTimeMillis() - startTime) + "ms, " + numMovements + " movements considered");
-                return Optional.of(new Path(startNode, current, numNodes, goal, context));
+            if (goal.isInGoal(currentNode.x, currentNode.y, currentNode.z)) {
+                logDebug("Took " + (System.currentTimeMillis() - startTime) + "ms, " + numMovementsConsidered + " movements considered");
+                return Optional.of(new Path(startNode, currentNode, numNodes, goal, calcContext));
             }
-
             for (Moves moves : allMoves) {
-                int newX = current.x + moves.xOffset;
-                int newZ = current.z + moves.zOffset;
-
-                if ((newX >> 4 != current.x >> 4 || newZ >> 4 != current.z >> 4) && !context.isLoaded(newX, newZ)) {
+                int newX = currentNode.x + moves.xOffset;
+                int newZ = currentNode.z + moves.zOffset;
+                if ((newX >> 4 != currentNode.x >> 4 || newZ >> 4 != currentNode.z >> 4) && !calcContext.isLoaded(newX, newZ)) {
                     if (!moves.dynamicXZ) {
                         numEmptyChunk++;
                     }
                     continue;
                 }
-
-                if (current.y + moves.yOffset > 256 || current.y + moves.yOffset < 0) {
+                if (!moves.dynamicXZ && !worldBorder.entirelyContains(newX, newZ)) {
                     continue;
                 }
-
+                if (currentNode.y + moves.yOffset > 256 || currentNode.y + moves.yOffset < 0) {
+                    continue;
+                }
                 res.reset();
-
-                moves.apply(context, current.x, current.y, current.z, res);
-                numMovements++;
-
+                moves.apply(calcContext, currentNode.x, currentNode.y, currentNode.z, res);
+                numMovementsConsidered++;
                 double actionCost = res.cost;
                 if (actionCost >= ActionCosts.COST_INF) {
                     continue;
                 }
-
                 if (actionCost <= 0 || Double.isNaN(actionCost)) {
                     throw new IllegalStateException(moves + " calculated implausible cost " + actionCost);
                 }
-
-                PathNode neighbour = new PathNode(res.x, res.y, res.z);
-
-                if (closedSet.contains(neighbour))
+                if (moves.dynamicXZ && !worldBorder.entirelyContains(res.x, res.z)) {
                     continue;
+                }
+                if (!moves.dynamicXZ && (res.x != newX || res.z != newZ)) {
+                    throw new IllegalStateException(moves + " " + res.x + " " + newX + " " + res.z + " " + newZ);
+                }
+                if (!moves.dynamicY && res.y != currentNode.y + moves.yOffset) {
+                    throw new IllegalStateException(moves + " " + res.y + " " + (currentNode.y + moves.yOffset));
+                }
+                long hashCode = BetterBlockPos.longHash(res.x, res.y, res.z);
 
-                double tentativeCost = current.gCost + actionCost;
-
-                if (tentativeCost < neighbour.gCost || !openSet.contains(neighbour)) {
-                    neighbour.gCost = tentativeCost;
-                    neighbour.hCost = goal.heuristic(neighbour.x, neighbour.y, neighbour.z);
-                    neighbour.parent = current;
-
-                    if (!openSet.contains(neighbour))
-                        openSet.add(neighbour);
-
+                PathNode neighbor = getNodeAtPosition(res.x, res.y, res.z, hashCode);
+                double tentativeCost = currentNode.cost + actionCost;
+                if (neighbor.cost - tentativeCost > minimumImprovement) {
+                    neighbor.previous = currentNode;
+                    neighbor.cost = tentativeCost;
+                    neighbor.combinedCost = tentativeCost + neighbor.estimatedCostToGoal;
+                    if (neighbor.isOpen()) {
+                        openSet.update(neighbor);
+                    } else {
+                        openSet.insert(neighbor);
+                    }
+                    for (int i = 0; i < COEFFICIENTS.length; i++) {
+                        double heuristic = neighbor.estimatedCostToGoal + neighbor.cost / COEFFICIENTS[i];
+                        if (bestHeuristicSoFar[i] - heuristic > minimumImprovement) {
+                            bestHeuristicSoFar[i] = heuristic;
+                            bestSoFar[i] = neighbor;
+                            if (failing && getDistFromStartSq(neighbor) > MIN_DIST_PATH * MIN_DIST_PATH) {
+                                failing = false;
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        if (numEmptyChunk >= pathingMaxChunkBorderFetch) {
-            Helper.HELPER.logDebug("Path cutoff because of chunk border fetch. Empty chunk count: " + numEmptyChunk + ", Threshold: " + pathingMaxChunkBorderFetch);
-            if (current == null) {
-                throw new IllegalStateException("Last node at path cutoff is null");
-            }
-            return Optional.of(new Path(startNode, current, numNodes, goal, context));
+        if (cancelRequested) {
+            return Optional.empty();
         }
-
-        return Optional.empty();
+        System.out.println(numMovementsConsidered + " movements considered");
+        System.out.println("Open set size: " + openSet.size());
+        System.out.println("PathNode map size: " + mapSize());
+        System.out.println((int) (numNodes * 1.0 / ((System.currentTimeMillis() - startTime) / 1000F)) + " nodes per second");
+        Optional<IPath> result = bestSoFar(true, numNodes);
+        if (result.isPresent()) {
+            logDebug("Took " + (System.currentTimeMillis() - startTime) + "ms, " + numMovementsConsidered + " movements considered");
+        }
+        return result;
     }
 }

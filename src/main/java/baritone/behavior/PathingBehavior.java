@@ -7,13 +7,19 @@ import baritone.api.event.events.SprintStateEvent;
 import baritone.api.event.events.TickEvent;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.goals.Goal;
+import baritone.api.pathing.goals.GoalXZ;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Helper;
+import baritone.api.utils.PathCalculationResult;
+import baritone.api.utils.interfaces.IGoalRenderPos;
 import baritone.pathing.calc.AStarPathFinder;
+import baritone.pathing.calc.AbstractNodeCostSearch;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.path.PathExecutor;
 import baritone.utils.PathRenderer;
+import net.minecraft.util.BlockPos;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class PathingBehavior extends Behavior implements IPathingBehavior, Helper {
@@ -68,27 +74,55 @@ public class PathingBehavior extends Behavior implements IPathingBehavior, Helpe
 
     @Override
     public void findPath(BetterBlockPos start) {
-        context = new CalculationContext(baritone, true);
+        context = new CalculationContext(baritone, true);            long primaryTimeout;
+        long failureTimeout;
+        if (current == null) {
+            primaryTimeout = Baritone.settings().primaryTimeoutMS.value;
+            failureTimeout = Baritone.settings().failureTimeoutMS.value;
+        } else {
+            primaryTimeout = Baritone.settings().planAheadPrimaryTimeoutMS.value;
+            failureTimeout = Baritone.settings().planAheadFailureTimeoutMS.value;
+        }
+        AbstractNodeCostSearch pathfinder = createPathfinder(start, goal, current == null ? null : current.getPath(), context);
+        if (!Objects.equals(pathfinder.getGoal(), goal)) {
+            logDebug("Simplifying " + goal.getClass() + " to GoalXZ due to distance");
+        }
 
         Baritone.getExecutor().execute(() -> {
-            inProgress = new AStarPathFinder(start, goal, context);
-            logDebug("Started pathfinding");
-            Optional<IPath> path = inProgress.pathFind();
-            inProgress = null;
-            logDebug("Finished pathfinding");
-            if (!path.isPresent()) {
-                logDirect("No path found");
-            } else {
-                synchronized (pathPlanLock) {
-                    IPath assembled = path.get().postProcess();
-                    if (current == null) {
-                        current = new PathExecutor(this, assembled);
-                    } else if (next == null) {
-                        next = new PathExecutor(this, assembled);
+            logDebug("Starting to search for path from " + start + " to " + goal);
+
+            PathCalculationResult calcResult = pathfinder.calculate(primaryTimeout, failureTimeout);
+            synchronized (pathPlanLock) {
+                Optional<PathExecutor> executor = calcResult.getPath().map(p -> new PathExecutor(PathingBehavior.this, p));
+                if (current == null) {
+                    if (executor.isPresent()) {
+                        current = executor.get();
                     }
+                } else {
+                    if (next == null) {
+                        if (executor.isPresent()) {
+                            next = executor.get();
+                        }
+                    } else {
+                        logDirect("Warning: PathingBehaivor illegal state! Discarding invalid path!");
+                    }
+                }
+                synchronized (pathCalcLock) {
+                    inProgress = null;
                 }
             }
         });
+    }
+
+    private static AbstractNodeCostSearch createPathfinder(BlockPos start, Goal goal, IPath previous, CalculationContext context) {
+        Goal transformed = goal;
+        if (Baritone.settings().simplifyUnloadedYCoord.value && goal instanceof IGoalRenderPos) {
+            BlockPos pos = ((IGoalRenderPos) goal).getGoalPos();
+            if (!context.bsi.worldContainsLoadedChunk(pos.getX(), pos.getZ())) {
+                transformed = new GoalXZ(pos.getX(), pos.getZ());
+            }
+        }
+        return new AStarPathFinder(start.getX(), start.getY(), start.getZ(), transformed, context);
     }
 
     @Override

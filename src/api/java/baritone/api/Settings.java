@@ -24,6 +24,41 @@ public class Settings {
 
     //TODO: Smooth look settings
 
+    public final Setting<Double> pathCutoffFactor = new Setting<>(0.9);
+
+    public final Setting<Integer> pathCutoffMinimumLength = new Setting<>(30);
+
+
+    public final Setting<Boolean> cutoffAtLoadBoundary = new Setting<>(false);
+
+    public final Setting<Long> primaryTimeoutMS = new Setting<>(500L);
+
+    public final Setting<Long> failureTimeoutMS = new Setting<>(2000L);
+
+    public final Setting<Long> planAheadPrimaryTimeoutMS = new Setting<>(4000L);
+
+    public final Setting<Long> planAheadFailureTimeoutMS = new Setting<>(5000L);
+
+    public final Setting<Boolean> simplifyUnloadedYCoord = new Setting<>(true);
+
+    public final Setting<Boolean> slowPath = new Setting<>(false);
+
+    public final Setting<Long> slowPathTimeDelayMS = new Setting<>(100L);
+
+    public final Setting<Boolean> minimumImprovementRepropagation = new Setting<>(true);
+
+    public final Setting<Long> slowPathTimeoutMS = new Setting<>(40000L);
+
+    public final Setting<Integer> pathingMapDefaultSize = new Setting<>(1024);
+
+    public final Setting<Float> pathingMapLoadFactor = new Setting<>(0.75f);
+
+    public final Setting<Boolean> allowParkour = new Setting<>(true);
+
+    public final Setting<Boolean> allowJumpAt256 = new Setting<>(true);
+
+    public final Setting<Boolean> allowParkourAscend = new Setting<>(true);
+
     public final Setting<Integer> yawRotationTimeTicks = new Setting<>(20);
 
     public final Setting<Integer> pitchRotationTimeTicks = new Setting<>(25);

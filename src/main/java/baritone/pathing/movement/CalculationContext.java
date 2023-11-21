@@ -19,6 +19,9 @@ public class CalculationContext {
     public final World world;
     public final BlockStateInterface bsi;
     public final boolean canSprint;
+    public final boolean allowParkour;
+    public final boolean allowJumpAt256;
+    public final boolean allowParkourAscend;
     public final boolean assumeWalkOnWater;
     public final boolean allowDiagonalDescend;
     public final boolean allowDiagonalAscend;
@@ -44,6 +47,9 @@ public class CalculationContext {
         this.world = baritone.getPlayerContext().world();
         this.bsi = new BlockStateInterface(baritone.getPlayerContext(), forUseOnAnotherThread);
         this.canSprint = Baritone.settings().allowSprint.value && player.getFoodStats().getFoodLevel() > 6;
+        this.allowParkour = Baritone.settings().allowParkour.value;
+        this.allowJumpAt256 = Baritone.settings().allowJumpAt256.value;
+        this.allowParkourAscend = Baritone.settings().allowParkourAscend.value;
         this.assumeWalkOnWater = Baritone.settings().assumeWalkOnWater.value;
         this.allowDiagonalDescend = Baritone.settings().allowDiagonalDescend.value;
         this.allowDiagonalAscend = Baritone.settings().allowDiagonalAscend.value;

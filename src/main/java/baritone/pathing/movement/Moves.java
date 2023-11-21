@@ -219,6 +219,53 @@ public enum Moves {
         public void apply(CalculationContext context, int x, int y, int z, MutableMoveResult result) {
             MovementDiagonal.cost(context, x, y, z, x - 1, z + 1, result);
         }
+    },
+    PARKOUR_NORTH(0, 0, -4, true, true) {
+        @Override
+        public Movement apply0(CalculationContext context, BetterBlockPos src) {
+            return MovementParkour.cost(context, src, EnumFacing.NORTH);
+        }
+
+        @Override
+        public void apply(CalculationContext context, int x, int y, int z, MutableMoveResult result) {
+            MovementParkour.cost(context, x, y, z, EnumFacing.NORTH, result);
+        }
+    },
+
+    PARKOUR_SOUTH(0, 0, +4, true, true) {
+        @Override
+        public Movement apply0(CalculationContext context, BetterBlockPos src) {
+            return MovementParkour.cost(context, src, EnumFacing.SOUTH);
+        }
+
+        @Override
+        public void apply(CalculationContext context, int x, int y, int z, MutableMoveResult result) {
+            MovementParkour.cost(context, x, y, z, EnumFacing.SOUTH, result);
+        }
+    },
+
+    PARKOUR_EAST(+4, 0, 0, true, true) {
+        @Override
+        public Movement apply0(CalculationContext context, BetterBlockPos src) {
+            return MovementParkour.cost(context, src, EnumFacing.EAST);
+        }
+
+        @Override
+        public void apply(CalculationContext context, int x, int y, int z, MutableMoveResult result) {
+            MovementParkour.cost(context, x, y, z, EnumFacing.EAST, result);
+        }
+    },
+
+    PARKOUR_WEST(-4, 0, 0, true, true) {
+        @Override
+        public Movement apply0(CalculationContext context, BetterBlockPos src) {
+            return MovementParkour.cost(context, src, EnumFacing.WEST);
+        }
+
+        @Override
+        public void apply(CalculationContext context, int x, int y, int z, MutableMoveResult result) {
+            MovementParkour.cost(context, x, y, z, EnumFacing.WEST, result);
+        }
     }
     ;
 

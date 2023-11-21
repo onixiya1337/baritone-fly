@@ -1,19 +1,28 @@
 package baritone.pathing.movement.movements;
 
+import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.Rotation;
+import baritone.api.utils.RotationUtils;
+import baritone.api.utils.VecUtils;
+import baritone.api.utils.input.Input;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.pathing.MutableMoveResult;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Vec3;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +48,121 @@ public class MovementParkour extends Movement {
     }
 
     public static void cost(CalculationContext context, int x, int y, int z, EnumFacing dir, MutableMoveResult res) {
-        //TODO
+        if (!context.allowParkour) {
+            return;
+        }
+        if (y == 256 && !context.allowJumpAt256) {
+            return;
+        }
+
+        int xDiff = dir.getFrontOffsetX();
+        int zDiff = dir.getFrontOffsetZ();
+        if (!MovementHelper.fullyPassable(context, x + xDiff, y, z + zDiff)) {
+            return;
+        }
+        IBlockState adj = context.get(x + xDiff, y - 1, z + zDiff);
+        if (MovementHelper.canWalkOn(context, x + xDiff, y - 1, z + zDiff, adj)) {
+            return;
+        }
+        Block adjBlock = adj.getBlock();
+        if (MovementHelper.avoidWalkingInto(adjBlock) && !MovementHelper.isWater(adjBlock)) {
+            return;
+        }
+        if (!MovementHelper.fullyPassable(context, x + xDiff, y + 1, z + zDiff)) {
+            return;
+        }
+        if (!MovementHelper.fullyPassable(context, x + xDiff, y + 2, z + zDiff)) {
+            return;
+        }
+        if (!MovementHelper.fullyPassable(context, x, y + 2, z)) {
+            return;
+        }
+        IBlockState standingOn = context.get(x, y - 1, z);
+        Block standingOnBlock = standingOn.getBlock();
+        if (standingOnBlock == Blocks.vine || standingOnBlock == Blocks.ladder || standingOnBlock instanceof BlockStairs || MovementHelper.isBottomSlab(standingOn)) {
+            return;
+        }
+        if (context.assumeWalkOnWater && !MovementHelper.isWater(standingOnBlock)) {
+            return;
+        }
+        if (MovementHelper.isWater(context.getBlock(x, y , z))) {
+            return;
+        }
+        int maxJump;
+        if (standingOn.getBlock() == Blocks.soul_sand) {
+            maxJump = 2;
+        } else {
+            if (context.canSprint) {
+                maxJump = 4;
+            } else {
+                maxJump = 3;
+            }
+        }
+
+        int verifiedMaxJump = 1;
+        for (int i = 2; i <= maxJump; i++) {
+            int destX = x + xDiff * i;
+            int destZ = z + zDiff * i;
+
+            if (!MovementHelper.fullyPassable(context, destX, y + 1, destZ)) {
+                break;
+            }
+            if (!MovementHelper.fullyPassable(context, destX, y + 2, destZ)) {
+                break;
+            }
+
+            IBlockState destInto = context.bsi.get0(destX, y, destZ);
+            if (!MovementHelper.fullyPassable(context, destX, y, destZ, destInto)) {
+                if (i <= 3 && context.allowParkourAscend && context.canSprint && MovementHelper.canWalkOn(context, destX, y, destZ, destInto) && checkOvershootSafety(context.bsi, destX + xDiff, y + 1, destZ + zDiff)) {
+                    res.x = destX;
+                    res.y = y + 1;
+                    res.z = destZ;
+                    res.cost = i * SPRINT_ONE_BLOCK_COST + context.jumpPenalty;
+                    return;
+                }
+                break;
+            }
+
+            IBlockState landingOn = context.bsi.get0(destX, y - 1, destZ);
+            if ((landingOn.getBlock() != Blocks.farmland && MovementHelper.canWalkOn(context, destX, y - 1, destZ, landingOn))) {
+                if (checkOvershootSafety(context.bsi, destX + xDiff, y, destZ + zDiff)) {
+                    if (i == 4 && (!MovementHelper.canWalkOn(context, destX + xDiff, y - 1, destZ + zDiff) || !checkOvershootSafety(context.bsi, destX + 2 * xDiff, y, destZ + 2 * zDiff))) {
+                        return;
+                    }
+                    res.x = destX;
+                    res.y = y;
+                    res.z = destZ;
+                    res.cost = costFromJumpDistance(i) + context.jumpPenalty;
+                    return;
+                }
+                break;
+            }
+
+            if (!MovementHelper.fullyPassable(context, destX, y + 3, destZ)) {
+                break;
+            }
+
+            verifiedMaxJump = i;
+        }
+
+        //TODO: placing here ig
+    }
+
+    private static boolean checkOvershootSafety(BlockStateInterface bsi, int x, int y, int z) {
+        return !MovementHelper.avoidWalkingInto(bsi.get0(x, y, z).getBlock()) && !MovementHelper.avoidWalkingInto(bsi.get0(x, y + 1, z).getBlock());
+    }
+
+    private static double costFromJumpDistance(int dist) {
+        switch (dist) {
+            case 2:
+                return WALK_ONE_BLOCK_COST * 2;
+            case 3:
+                return WALK_ONE_BLOCK_COST * 3;
+            case 4:
+                return SPRINT_ONE_BLOCK_COST * 4;
+            default:
+                throw new IllegalStateException("LOL " + dist);
+        }
     }
 
 
@@ -55,8 +178,13 @@ public class MovementParkour extends Movement {
 
     @Override
     protected Set<BetterBlockPos> calculateValidPositions() {
-        //TODO
-        return new HashSet<>();
+        Set<BetterBlockPos> set = new HashSet<>();
+        for (int i = 0; i <= dist; i++) {
+            for (int y = 0; y < 2; y++) {
+                set.add(src.offset(direction, i).up(y));
+            }
+        }
+        return set;
     }
 
     @Override
@@ -70,7 +198,56 @@ public class MovementParkour extends Movement {
         if (state.getStatus() != MovementStatus.RUNNING) {
             return state;
         }
+        if (ctx.playerFeet().y < src.y) {
+            return state.setStatus(MovementStatus.UNREACHABLE);
+        }
+        if (dist >= 4 || ascend) {
+            state.setInput(Input.SPRINT, true);
+        }
+        Vec3 destCenter = VecUtils.getBlockPosCenter(dest);
+        MovementHelper.rotate(ctx, state, destCenter);
+        Rotation required = RotationUtils.calcRotationFromVec3d(ctx.playerHead(), destCenter, ctx.playerRotations());
+        if (Math.abs(ctx.playerRotations().subtract(required).normalize().getYaw()) <= Baritone.settings().randomLooking113.value + Baritone.settings().randomLooking.value) {
+            state.setInput(Input.MOVE_FORWARD, true);
+        }
+        if (ctx.playerFeet().equals(dest)) {
+            if (ctx.playerMotion().lengthVector() > 0.3) {
+                state.setInput(Input.SNEAK, true);
+                return state;
+            }
 
+            Block d = BlockStateInterface.getBlock(ctx, dest);
+            if (d == Blocks.vine || d == Blocks.ladder) {
+                return state.setStatus(MovementStatus.SUCCESS);
+            }
+            if (ctx.playerFeetAsVec().yCoord - ctx.playerFeet().getY() < 0.094) {
+                state.setStatus(MovementStatus.SUCCESS);
+            }
+        } else if (!ctx.playerFeet().equals(src)) {
+            if (ctx.playerFeet().equals(src.offset(direction)) || ctx.playerFeetAsVec().yCoord - src.y > 0.0001) {
+                if (dist == 3 && !ascend) {
+                    double xDiff = (src.x + 0.5) - ctx.playerFeetAsVec().xCoord;
+                    double zDiff = (src.z + 0.5) - ctx.playerFeetAsVec().zCoord;
+                    double distFromStart = Math.max(Math.abs(xDiff), Math.abs(zDiff));
+                    if (distFromStart < 0.7) {
+                        return state;
+                    }
+                }
+
+                state.setInput(Input.JUMP, true);
+            } else if (!ctx.playerFeet().equals(dest.offset(direction, -1))) {
+                state.setInput(Input.SPRINT, false);
+                if (ctx.playerFeet().equals(src.offset(direction, -1))) {
+                    Vec3 srcCenter = VecUtils.getBlockPosCenter(src);
+                    MovementHelper.rotate(ctx, state, srcCenter);
+                    MovementHelper.setInputsAccurate(ctx, state, srcCenter);
+                } else {
+                    Vec3 srcOffsetCenter = VecUtils.getBlockPosCenter(src.offset(direction, -1));
+                    MovementHelper.rotate(ctx, state, srcOffsetCenter);
+                    MovementHelper.setInputsAccurate(ctx, state, srcOffsetCenter);
+                }
+            }
+        }
         return state;
     }
 }
