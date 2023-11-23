@@ -40,6 +40,7 @@ compileJava {
 sourceSets {
     launch {
         compileClasspath += main.compileClasspath + main.runtimeClasspath + main.output
+        runtimeClasspath += main.compileClasspath + main.runtimeClasspath + main.output
     }
 }
 
@@ -63,6 +64,11 @@ repositories {
     maven {
         name = 'impactdevelopment-repo'
         url = 'https://impactdevelopment.github.io/maven/'
+    }
+
+    maven {
+        name = 'devauth-repo'
+        url = 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1'
     }
 }
 

@@ -14,6 +14,12 @@ public class Interpolator {
         this.currentTicks = 0;
     }
 
+    public Interpolator(int animationTimeTicks, int currentTicks, CubicBezier bezier) {
+        this.bezier = bezier;
+        this.animationTimeTicks = animationTimeTicks;
+        this.currentTicks = currentTicks;
+    }
+
     public boolean finished() {
         return currentTicks >= animationTimeTicks;
     }

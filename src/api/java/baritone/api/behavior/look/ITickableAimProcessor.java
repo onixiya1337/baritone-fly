@@ -5,8 +5,6 @@ import baritone.api.utils.Rotation;
 
 public interface ITickableAimProcessor extends IAimProcessor {
 
-    boolean finished();
-
     void tick();
 
     void advance(int ticks);

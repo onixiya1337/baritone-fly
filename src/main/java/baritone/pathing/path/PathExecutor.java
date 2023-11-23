@@ -228,6 +228,10 @@ public class PathExecutor implements IPathExecutor, Helper {
 
         IMovement current = path.movements().get(pathPosition);
 
+        if (current instanceof MovementParkour) {
+            return false;
+        }
+
         if (current instanceof MovementDiagonal) {
             if (current.getDest().y != current.getSrc().y) {
                 return false;

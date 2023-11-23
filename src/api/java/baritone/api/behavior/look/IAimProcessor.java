@@ -6,7 +6,9 @@ import java.util.function.Supplier;
 
 public interface IAimProcessor {
 
-    Rotation peekRotation(Rotation initial, Rotation rotation);
+    Rotation peekRotation(Rotation rotation);
+
+    Rotation interpolate(Rotation initial, Rotation rotation);
 
     ITickableAimProcessor fork();
 }

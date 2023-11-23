@@ -59,9 +59,9 @@ public class Settings {
 
     public final Setting<Boolean> allowParkourAscend = new Setting<>(true);
 
-    public final Setting<Integer> yawRotationTimeTicks = new Setting<>(20);
+    public final Setting<Float> yawSmoothingFactor = new Setting<>(4f);
 
-    public final Setting<Integer> pitchRotationTimeTicks = new Setting<>(25);
+    public final Setting<Float> pitchSmoothingFactor = new Setting<>(2f);
 
     public final Setting<Boolean> safeMode = new Setting<>(true);
 

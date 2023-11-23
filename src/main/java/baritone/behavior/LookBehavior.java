@@ -23,7 +23,7 @@ public class LookBehavior extends Behavior implements ILookBehavior {
 
     private Rotation prevRotation;
 
-    private AimProcessor processor;
+    private final AimProcessor processor;
 
     public LookBehavior(Baritone baritone) {
         super(baritone);
@@ -32,14 +32,9 @@ public class LookBehavior extends Behavior implements ILookBehavior {
 
     @Override
     public void updateTarget(Rotation rotation, boolean blockInteract) {
-        if (target != null && rotation.isReallyCloseTo(target.rotation)) {
-            return;
-        }
-        if (target == null || Math.abs(target.rotation.subtract(rotation).getYaw()) > 25) {
-            this.processor = new AimProcessor(ctx);
-        }
-        target = new Target(ctx.playerRotations(), rotation, Target.Mode.resolve(blockInteract));
+        this.target = new Target(ctx.playerRotations(), rotation, Target.Mode.resolve(blockInteract));
     }
+
 
     @Override
     public IAimProcessor getAimProcessor() {
@@ -48,16 +43,9 @@ public class LookBehavior extends Behavior implements ILookBehavior {
 
     @Override
     public void onTick(TickEvent event) {
-        if (event.getType() == TickEvent.Type.OUT) {
-            return;
+        if (event.getType() == TickEvent.Type.IN) {
+            this.processor.tick();
         }
-
-        if (this.processor.finished()) {
-            this.target = null;
-            return;
-        }
-
-        this.processor.tick();
     }
 
     @Override
@@ -73,7 +61,8 @@ public class LookBehavior extends Behavior implements ILookBehavior {
                 }
 
                 this.prevRotation = new Rotation(ctx.player().rotationYaw, ctx.player().rotationPitch);
-                final Rotation actual = this.processor.peekRotation(this.target.initial, this.target.rotation);
+                final Rotation interpolated = this.processor.interpolate(this.target.initial, this.target.rotation);
+                final Rotation actual = this.processor.peekRotation(interpolated);
                 ctx.player().rotationYaw = actual.getYaw();
                 ctx.player().rotationPitch = actual.getPitch();
                 break;
@@ -87,6 +76,13 @@ public class LookBehavior extends Behavior implements ILookBehavior {
                     }
 
                     this.prevRotation = null;
+                }
+
+                final Rotation interpolated = this.processor.interpolate(this.target.initial, this.target.rotation);
+                Rotation delta = interpolated.subtract(target.rotation).normalizeAndClamp();
+                if (Math.abs(delta.getYaw()) < Baritone.settings().randomLooking.value + Baritone.settings().randomLooking113.value &&
+                        Math.abs(delta.getPitch()) < Baritone.settings().randomLooking.value) {
+                    this.target = null;
                 }
                 break;
             }
@@ -124,7 +120,8 @@ public class LookBehavior extends Behavior implements ILookBehavior {
     @Override
     public void onPlayerRotationMove(RotationMoveEvent event) {
         if (target != null) {
-            final Rotation actual = this.processor.peekRotation(this.target.initial, this.target.rotation);
+            final Rotation interpolated = this.processor.interpolate(this.target.initial, this.target.rotation);
+            final Rotation actual = this.processor.peekRotation(interpolated);
             event.setYaw(actual.getYaw());
             event.setPitch(actual.getPitch());
         }
@@ -151,24 +148,9 @@ public class LookBehavior extends Behavior implements ILookBehavior {
         private double randomPitchOffset;
 
 
-        private final Interpolator yawInterpolator;
-        private final Interpolator pitchInterpolator;
-
-        private float yawInterpolation;
-
-        private float pitchInterpolation;
-
         public AbstractAimProcessor(IPlayerContext ctx) {
             this.ctx = ctx;
             this.rand = new ForkableRandom();
-            this.yawInterpolator = new Interpolator(
-                    Baritone.settings().yawRotationTimeTicks.value,
-                    new CubicBezier(0.85, 0, 0.15, 1)
-            );
-            this.pitchInterpolator = new Interpolator(
-                    Baritone.settings().pitchRotationTimeTicks.value,
-                    new CubicBezier(0.22, 1, 0.36, 1)
-            );
         }
 
         private AbstractAimProcessor(final AbstractAimProcessor source) {
@@ -176,25 +158,14 @@ public class LookBehavior extends Behavior implements ILookBehavior {
             this.rand = source.rand.fork();
             this.randomYawOffset = source.randomYawOffset;
             this.randomPitchOffset = source.randomPitchOffset;
-            this.yawInterpolator = source.yawInterpolator;
-            this.pitchInterpolator = source.pitchInterpolator;
-            this.yawInterpolation = source.yawInterpolation;
-            this.pitchInterpolation = source.pitchInterpolation;
         }
 
         @Override
-        public boolean finished() {
-            return yawInterpolator.finished() && pitchInterpolator.finished();
-        }
-
-        @Override
-        public final Rotation peekRotation(final Rotation initial, final Rotation rotation) {
+        public final Rotation peekRotation(final Rotation rotation) {
             final Rotation prev = this.getPrevRotation();
 
-            Rotation delta = rotation.subtract(initial).normalizeAndClamp();
-
-            float desiredYaw = initial.getYaw() + delta.getYaw() * this.yawInterpolation;
-            float desiredPitch = initial.getPitch() + delta.getPitch() * this.pitchInterpolation;
+            float desiredYaw = rotation.getYaw();
+            float desiredPitch = rotation.getPitch();
 
             if (desiredPitch == prev.getPitch()) {
                 desiredPitch = nudgeToLevel(desiredPitch);
@@ -210,10 +181,46 @@ public class LookBehavior extends Behavior implements ILookBehavior {
         }
 
         @Override
-        public final void tick() {
-            this.yawInterpolation = this.yawInterpolator.nextInterpolation();
-            this.pitchInterpolation = this.pitchInterpolator.nextInterpolation();
+        public final Rotation interpolate(final Rotation initial, final Rotation rotation) {
+            final Rotation prev = this.getPrevRotation();
 
+            float yawSmoothingFactor = Baritone.settings().yawSmoothingFactor.value;
+            float pitchSmoothingFactor = Baritone.settings().pitchSmoothingFactor.value;
+
+            Rotation delta = rotation.subtract(initial).normalizeAndClamp();
+
+            if (Math.abs(delta.getYaw()) > 45) {
+                yawSmoothingFactor *= 2;
+            } else if (Math.abs(delta.getYaw()) > 90) {
+                yawSmoothingFactor *= 3;
+            }
+            if (Math.abs(delta.getPitch()) > 45) {
+                pitchSmoothingFactor *= 2;
+            }
+
+            float yawProgress = Math.abs(Rotation.normalizeYaw(rotation.getYaw() - initial.getYaw()) / delta.getYaw());
+            float yawInterpolation = new CubicBezier(0.42,0.04,0.55,0.96).calculateYWithX(yawProgress);
+
+            float pitchProgress = Math.abs(Rotation.clampPitch(rotation.getPitch() - initial.getPitch()) / delta.getPitch());
+            float pitchInterpolation = new CubicBezier(0.33, 1, 0.68, 1).calculateYWithX(pitchProgress);
+
+            float desiredYaw = initial.getYaw() + delta.getYaw() * yawInterpolation;
+            float desiredPitch = initial.getPitch() + delta.getPitch() * pitchInterpolation;
+
+            float deltaYaw = Rotation.normalizeYaw(desiredYaw - prev.getYaw());
+            deltaYaw /= yawSmoothingFactor;
+
+            float deltaPitch = Rotation.clampPitch(desiredPitch - prev.getPitch());
+            deltaPitch /= pitchSmoothingFactor;
+
+            return new Rotation(
+                    this.calculateMouseMove(prev.getYaw(), prev.getYaw() + deltaYaw),
+                    this.calculateMouseMove(prev.getPitch(), prev.getPitch() + deltaPitch)
+            ).clamp();
+        }
+
+        @Override
+        public final void tick() {
             this.randomYawOffset = (this.rand.nextDouble() - 0.5) * Baritone.settings().randomLooking.value;
             this.randomPitchOffset = (this.rand.nextDouble() - 0.5) * Baritone.settings().randomLooking.value;
 
@@ -234,7 +241,8 @@ public class LookBehavior extends Behavior implements ILookBehavior {
 
         @Override
         public Rotation nextRotation(final Rotation initial, final Rotation rotation) {
-            final Rotation actual = this.peekRotation(initial, rotation);
+            final Rotation interpolated = this.interpolate(initial, rotation);
+            final Rotation actual = this.peekRotation(interpolated);
             this.tick();
             return actual;
         }
