@@ -177,7 +177,7 @@ public class MovementDescend extends Movement {
             double destX = (src.getX() + 0.5) * 0.17 + (dest.getX() + 0.5) * 0.83;
             double destZ = (src.getZ() + 0.5) * 0.17 + (dest.getZ() + 0.5) * 0.83;
 
-            Vec3 destCenter = new Vec3(destX, dest.getY(), destZ);
+            Vec3 destCenter = new Vec3(destX, dest.getY(), destZ).subtract(0, 0.5, 0);
             MovementHelper.rotate(ctx, state, destCenter);
             MovementHelper.setInputsAccurate(ctx, state, destCenter);
 

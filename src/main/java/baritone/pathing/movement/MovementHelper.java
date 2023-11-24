@@ -425,7 +425,6 @@ public interface MovementHelper extends ActionCosts, Helper {
             simulation.copy(ctx.player());
             Vec3 prediction = movement.pred(simulation, ctx);
 
-
             double distance = prediction.distanceTo(dest);
 
             if (closest == null || distance < closest.getSecond()) {

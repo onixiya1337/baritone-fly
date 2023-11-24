@@ -238,11 +238,11 @@ public class MovementParkour extends Movement {
             } else if (!ctx.playerFeet().equals(dest.offset(direction, -1))) {
                 state.setInput(Input.SPRINT, false);
                 if (ctx.playerFeet().equals(src.offset(direction, -1))) {
-                    Vec3 srcCenter = VecUtils.getBlockPosCenter(src);
+                    Vec3 srcCenter = VecUtils.getBlockPosCenter(src).subtract(0, 0.5, 0);
                     MovementHelper.rotate(ctx, state, srcCenter);
                     MovementHelper.setInputsAccurate(ctx, state, srcCenter);
                 } else {
-                    Vec3 srcOffsetCenter = VecUtils.getBlockPosCenter(src.offset(direction, -1));
+                    Vec3 srcOffsetCenter = VecUtils.getBlockPosCenter(src.offset(direction, -1)).subtract(0, 0.5, 0);
                     MovementHelper.rotate(ctx, state, srcOffsetCenter);
                     MovementHelper.setInputsAccurate(ctx, state, srcOffsetCenter);
                 }

@@ -235,7 +235,7 @@ public class MovementDiagonal extends Movement {
         if (sprint()) {
             state.setInput(Input.SPRINT, true);
         }
-        Vec3 destCenter = VecUtils.getBlockPosCenter(dest);
+        Vec3 destCenter = VecUtils.getBlockPosCenter(dest).subtract(0, 0.5, 0);
         MovementHelper.rotate(ctx, state, destCenter);
         MovementHelper.setInputs(ctx, state, destCenter);
 

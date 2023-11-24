@@ -81,7 +81,7 @@ public class MovementFall extends Movement {
             }
         }
 
-        Vec3 destCenter = VecUtils.getBlockPosCenter(dest);
+        Vec3 destCenter = VecUtils.getBlockPosCenter(dest).subtract(0, 0.5, 0);
         if (Math.abs(ctx.playerFeetAsVec().xCoord + ctx.playerMotion().xCoord - destCenter.xCoord) > 0.1 ||
                 Math.abs(ctx.playerFeetAsVec().zCoord + ctx.playerMotion().zCoord - destCenter.zCoord) > 0.1) {
             if (!ctx.player().onGround && Math.abs(ctx.playerMotion().yCoord) > 0.4) {
@@ -104,7 +104,7 @@ public class MovementFall extends Movement {
             }
         }
 
-        Vec3 destCenterOffset = new Vec3(destCenter.xCoord + 0.125 * avoid.getX(), destCenter.yCoord, destCenter.zCoord + 0.125 * avoid.getZ());
+        Vec3 destCenterOffset = new Vec3(destCenter.xCoord + 0.125 * avoid.getX(), destCenter.yCoord - 0.5, destCenter.zCoord + 0.125 * avoid.getZ());
         MovementHelper.rotate(ctx, state, src, destCenterOffset);
         MovementHelper.setInputs(ctx, state, destCenterOffset);
         //TODO:  move towards destCenterOffset
