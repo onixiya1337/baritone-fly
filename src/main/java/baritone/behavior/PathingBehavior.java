@@ -74,7 +74,8 @@ public class PathingBehavior extends Behavior implements IPathingBehavior, Helpe
 
     @Override
     public void findPath(BetterBlockPos start) {
-        context = new CalculationContext(baritone, true);            long primaryTimeout;
+        context = new CalculationContext(baritone, true);
+        long primaryTimeout;
         long failureTimeout;
         if (current == null) {
             primaryTimeout = Baritone.settings().primaryTimeoutMS.value;
