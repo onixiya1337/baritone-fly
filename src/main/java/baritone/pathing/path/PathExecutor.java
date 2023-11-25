@@ -201,7 +201,6 @@ public class PathExecutor implements IPathExecutor, Helper {
             return false;
         }
         if (!MovementHelper.canWalkThrough(ctx, ctx.playerFeet()) || !MovementHelper.canWalkThrough(ctx, ctx.playerFeet().up())) {
-            // suffocating?
             return false;
         }
         if (!path.movements().get(pathPosition).safeToCancel()) {
@@ -270,7 +269,7 @@ public class PathExecutor implements IPathExecutor, Helper {
         IPlayerContext ctx = behavior.ctx;
 
         if (current instanceof MovementAscend || current instanceof MovementDescend) {
-            return ctx.playerFeet().equals(current.getSrc()) && ctx.playerMotion().lengthVector() > 0.15;
+            return false; //ctx.playerFeet().equals(current.getSrc()) && ctx.playerMotion().lengthVector() > 0.15;
         }
 
         if (pathPosition < path.length() - 3) {
