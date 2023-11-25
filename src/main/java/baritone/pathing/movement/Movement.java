@@ -25,6 +25,8 @@ public abstract class Movement implements IMovement, MovementHelper {
 
     private Set<BetterBlockPos> validPositionsCached = null;
 
+    private Boolean calculatedWhileLoaded;
+
     protected Movement(IBaritone baritone, BetterBlockPos src, BetterBlockPos dest) {
         this.baritone = baritone;
         this.ctx = baritone.getPlayerContext();
@@ -147,4 +149,14 @@ public abstract class Movement implements IMovement, MovementHelper {
     public BlockPos getDirection() {
         return getDest().subtract(getSrc());
     }
+
+    public void checkLoadedChunk(CalculationContext context) {
+        calculatedWhileLoaded = context.bsi.worldContainsLoadedChunk(dest.x, dest.z);
+    }
+
+    @Override
+    public boolean calculatedWhileLoaded() {
+        return calculatedWhileLoaded;
+    }
+
 }

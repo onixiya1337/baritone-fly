@@ -73,6 +73,15 @@ public class PathingBehavior extends Behavior implements IPathingBehavior, Helpe
     }
 
     @Override
+    public Optional<AbstractNodeCostSearch> getInProgress() {
+        return Optional.ofNullable(inProgress);
+    }
+
+    public CalculationContext secretInternalGetCalculationContext() {
+        return context;
+    }
+
+    @Override
     public void findPath(BetterBlockPos start) {
         context = new CalculationContext(baritone, true);
         long primaryTimeout;

@@ -131,6 +131,10 @@ public class MovementAscend extends Movement {
             return state;
         }
 
+        if (ctx.playerFeetAsVec().yCoord > src.y + 0.5) {
+            return state;
+        }
+
         if (headBonkClear()) {
             return state.setInput(Input.JUMP, true);
         }

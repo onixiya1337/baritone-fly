@@ -165,8 +165,22 @@ public class MovementTraverse extends Movement {
         //TODO: Move towards against
 
         Vec3 destCenter = VecUtils.getBlockPosCenter(against).subtract(0, 0.5, 0);
-        MovementHelper.rotate(ctx, state, destCenter);
+        Rotation target = RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
+                destCenter,
+                ctx.playerRotations()).withPitch(ctx.playerRotations().getPitch());
+
+        state.setTarget(new MovementState.MovementTarget(target, false));
+
+        Rotation nextRotation = baritone.getLookBehavior().getAimProcessor().interpolate(ctx.playerRotations(), target);
+        float deltaYaw = nextRotation.subtract(target).normalize().getYaw();
+        if (Math.abs(deltaYaw) <= Baritone.settings().randomLooking.value + Baritone.settings().randomLooking113.value) {
+            state.setInput(Input.MOVE_FORWARD, true);
+            return state;
+        }
+
         MovementHelper.setInputs(ctx, state, destCenter);
+
+        //TODO: perhaps move everything into a helper class here and copy the original baritone code
 
         return state;
     }

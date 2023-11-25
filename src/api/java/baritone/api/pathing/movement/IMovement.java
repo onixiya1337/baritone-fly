@@ -13,6 +13,8 @@ public interface IMovement {
 
     boolean safeToCancel();
 
+    boolean calculatedWhileLoaded();
+
     BetterBlockPos getSrc();
 
     BetterBlockPos getDest();

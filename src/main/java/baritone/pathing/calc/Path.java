@@ -95,6 +95,7 @@ class Path extends PathBase {
         }
         verified = true;
         boolean failed = assembleMovements();
+        movements.forEach(m -> m.checkLoadedChunk(context));
 
         if (failed) {
             CutoffPath res = new CutoffPath(this, movements().size());

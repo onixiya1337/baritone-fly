@@ -1,5 +1,6 @@
 package baritone.api.behavior;
 
+import baritone.api.pathing.calc.IPathFinder;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.path.IPathExecutor;
 import baritone.api.utils.BetterBlockPos;
@@ -30,6 +31,12 @@ public interface IPathingBehavior extends IBehavior {
     void findPath(BetterBlockPos start);
 
     boolean isPathing();
+
+    default boolean hasPath() {
+        return getCurrent() != null;
+    }
+
+    Optional<? extends IPathFinder> getInProgress();
 
     IPathExecutor getCurrent();
 }

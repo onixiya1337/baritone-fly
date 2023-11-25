@@ -22,7 +22,15 @@ import java.util.function.Consumer;
 
 public class Settings {
 
-    //TODO: Smooth look settings
+    public final Setting<Integer> pathHistoryCutoffAmount = new Setting<>(50);
+
+    public final Setting<Integer> maxPathHistoryLength = new Setting<>(300);
+
+    public final Setting<Boolean> allowOvershootDiagonalDescend = new Setting<>(false);
+
+    public final Setting<Boolean> sprintAscends = new Setting<>(true);
+
+    public final Setting<Double> maxCostIncrease = new Setting<>(10D);
 
     public final Setting<Double> pathCutoffFactor = new Setting<>(0.9);
 
@@ -139,7 +147,7 @@ public class Settings {
 
     public final Setting<Boolean> shortBaritonePrefix = new Setting<>(false);
 
-    public final Setting<Boolean> chatDebug = new Setting<>(true);
+    public final Setting<Boolean> chatDebug = new Setting<>(false);
 
     public final Setting<Boolean> desktopNotifications = new Setting<>(false);
 

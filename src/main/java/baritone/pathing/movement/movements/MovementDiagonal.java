@@ -4,6 +4,8 @@ import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.Rotation;
+import baritone.api.utils.RotationUtils;
 import baritone.api.utils.VecUtils;
 import baritone.api.utils.input.Input;
 import baritone.pathing.movement.CalculationContext;
@@ -236,7 +238,16 @@ public class MovementDiagonal extends Movement {
             state.setInput(Input.SPRINT, true);
         }
         Vec3 destCenter = VecUtils.getBlockPosCenter(dest).subtract(0, 0.5, 0);
-        MovementHelper.rotate(ctx, state, destCenter);
+        Rotation target = RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
+                destCenter,
+                ctx.playerRotations()).withPitch(ctx.playerRotations().getPitch());
+        float deltaYaw = ctx.playerRotations().subtract(target).normalize().getYaw();
+        if (Math.abs(deltaYaw) <= Baritone.settings().randomLooking.value + Baritone.settings().randomLooking113.value) {
+            state.setInput(Input.MOVE_FORWARD, true);
+            return state;
+        }
+
+        state.setTarget(new MovementState.MovementTarget(target, false));
         MovementHelper.setInputs(ctx, state, destCenter);
 
         return state;
