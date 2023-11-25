@@ -85,13 +85,6 @@ class Path extends PathBase {
                 return move;
             }
         }
-        for (FlyMoves moves : FlyMoves.values()) {
-            Movement move = moves.apply0(context, src);
-            if (move.getDest().equals(dest)) {
-                move.override(Math.min(move.calculateCost(context), cost));
-                return move;
-            }
-        }
         Helper.HELPER.logDebug("Movement became impossible during calculation " + src + " " + dest + " " + dest.subtract(src));
         return null;
     }

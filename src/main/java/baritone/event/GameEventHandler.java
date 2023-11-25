@@ -1,22 +1,25 @@
 package baritone.event;
 
 import baritone.Baritone;
+import baritone.api.BaritoneAPI;
 import baritone.api.event.events.*;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.event.listener.IGameEventListener;
+import baritone.api.pathing.calc.IPath;
+import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalXZ;
-import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.Helper;
-import baritone.api.utils.Pair;
+import baritone.api.utils.*;
+import baritone.pathing.calc.AbstractNodeCostSearch;
+import baritone.pathing.calc.FlyAStar;
+import baritone.pathing.movement.CalculationContext;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.IRenderer;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameEventHandler implements IEventBus {
@@ -40,6 +43,12 @@ public class GameEventHandler implements IEventBus {
             }
         } else {
             baritone.bsi = null;
+        }
+
+        IPlayerContext ctx = baritone.getPlayerContext();
+        if (ctx.minecraft().gameSettings.keyBindSneak.isPressed()) {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().setGoal(new GoalXZ(ctx.playerFeet().x + 50, ctx.playerFeet().z + 50));
+            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().findPath(ctx.playerFeet());
         }
         listeners.forEach(l -> l.onTick(event));
     }
