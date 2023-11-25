@@ -126,8 +126,11 @@ public class MovementParkour extends Movement {
             IBlockState landingOn = context.bsi.get0(destX, y - 1, destZ);
             if ((landingOn.getBlock() != Blocks.farmland && MovementHelper.canWalkOn(context, destX, y - 1, destZ, landingOn))) {
                 if (checkOvershootSafety(context.bsi, destX + xDiff, y, destZ + zDiff)) {
-                    if (i == 4 && (!MovementHelper.canWalkOn(context, destX + xDiff, y - 1, destZ + zDiff) || !checkOvershootSafety(context.bsi, destX + 2 * xDiff, y, destZ + 2 * zDiff))) {
-                        return;
+                    if (Baritone.settings().checkOvershootParkour.value) {
+                        if (!MovementHelper.canWalkOn(context, destX + xDiff, y - 1, destZ + zDiff) ||
+                                !checkOvershootSafety(context.bsi, destX + 2 * xDiff, y, destZ + 2 * zDiff)) {
+                            return;
+                        }
                     }
                     res.x = destX;
                     res.y = y;

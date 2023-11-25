@@ -17,6 +17,7 @@ import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.movements.*;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.InputOverrideHandler;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
@@ -250,10 +251,6 @@ public class PathExecutor implements IPathExecutor, Helper {
     }
 
     private boolean decrease() {
-        if (!BaritoneAPI.getSettings().safeMode.value) {
-            return false;
-        }
-
         IMovement current = path.movements().get(pathPosition);
 
         if (current instanceof MovementParkour) {
@@ -284,7 +281,11 @@ public class PathExecutor implements IPathExecutor, Helper {
             }
 
             if (next instanceof MovementAscend || next instanceof MovementDescend) {
-                return true;
+                boolean srcSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getSrc()));
+                boolean destSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getDest()));
+                if (srcSlab ^ destSlab) {
+                    return true;
+                }
             }
 
             if (next instanceof MovementDiagonal) {
@@ -301,7 +302,11 @@ public class PathExecutor implements IPathExecutor, Helper {
                 }
 
                 if (nextNext instanceof MovementAscend || nextNext instanceof MovementDescend) {
-                    return true;
+                    boolean srcSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getSrc()));
+                    boolean destSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getDest()));
+                    if (srcSlab ^ destSlab) {
+                        return true;
+                    }
                 }
 
                 if (nextNext instanceof MovementDiagonal) {
