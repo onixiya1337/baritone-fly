@@ -78,8 +78,6 @@ configurations {
 }
 
 dependencies {
-    runtime("it.unimi.dsi:fastutil:7.1.0")
-    implementation("it.unimi.dsi:fastutil:7.1.0")
     extraLibs("it.unimi.dsi:fastutil:7.1.0")
     compile("it.unimi.dsi:fastutil:7.1.0")
     compileOnly("com.google.code.findbugs:jsr305:3.0.1")
