@@ -5,21 +5,11 @@ import baritone.api.BaritoneAPI;
 import baritone.api.event.events.*;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.event.listener.IGameEventListener;
-import baritone.api.pathing.calc.IPath;
-import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalXZ;
 import baritone.api.utils.*;
-import baritone.pathing.calc.AbstractNodeCostSearch;
-import baritone.pathing.calc.FlyAStar;
-import baritone.pathing.movement.CalculationContext;
 import baritone.utils.BlockStateInterface;
-import baritone.utils.IRenderer;
-import net.minecraft.util.AxisAlignedBB;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameEventHandler implements IEventBus {
@@ -44,7 +34,6 @@ public class GameEventHandler implements IEventBus {
         } else {
             baritone.bsi = null;
         }
-
         /*
         IPlayerContext ctx = baritone.getPlayerContext();
         if (ctx.minecraft().gameSettings.keyBindSneak.isPressed()) {
