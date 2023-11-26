@@ -211,7 +211,8 @@ public class MovementParkour extends Movement {
         MovementHelper.rotate(ctx, state, destCenter);
         Rotation required = RotationUtils.calcRotationFromVec3d(ctx.playerHead(), destCenter, ctx.playerRotations());
         if (Math.abs(ctx.playerRotations().subtract(required).normalize().getYaw()) <= Baritone.settings().randomLooking113.value + Baritone.settings().randomLooking.value) {
-            state.setInput(Input.MOVE_FORWARD, true);
+            MovementHelper.setInputsAccurate(ctx, state, VecUtils.getBlockPosCenter(dest));
+            // state.setInput(Input.MOVE_FORWARD, true); //FIXME:
         }
         if (ctx.playerFeet().equals(dest)) {
             if (ctx.playerMotion().lengthVector() > 0.3) {
