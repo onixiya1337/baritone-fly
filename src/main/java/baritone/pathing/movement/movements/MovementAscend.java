@@ -117,7 +117,7 @@ public class MovementAscend extends Movement {
 
         Rotation nextRotation = baritone.getLookBehavior().getAimProcessor().interpolate(ctx.playerRotations(), target);
         float deltaYaw = nextRotation.subtract(target).normalize().getYaw();
-        if (Math.abs(deltaYaw) <= Baritone.settings().randomLooking.value + Baritone.settings().randomLooking113.value &&
+        if (Math.abs(deltaYaw) <= Baritone.settings().randomLooking.value + Baritone.settings().randomLooking113.value + Baritone.settings().maxYawOffsetForForward.value &&
                 MovementHelper.isWater(ctx, src)) {
             state.setInput(Input.MOVE_FORWARD, true);
             return state;

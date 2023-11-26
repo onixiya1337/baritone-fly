@@ -22,6 +22,8 @@ import java.util.function.Consumer;
 
 public class Settings {
 
+    public final Setting<Double> maxYawOffsetForForward = new Setting<>(15d);
+
     public final Setting<Boolean> checkOvershootParkour = new Setting<>(true);
 
     public final Setting<Integer> pathHistoryCutoffAmount = new Setting<>(50);
