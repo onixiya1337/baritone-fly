@@ -472,6 +472,35 @@ public interface MovementHelper extends ActionCosts, Helper {
         }
     }
 
+    static void decreaseMotion(MovementState state, IPlayerContext ctx) {
+        PlayerSimulation simulation = new PlayerSimulation(ctx.world());
+
+        HorizontalMovements[] movements = HorizontalMovements.values();
+
+        Tuple<HorizontalMovements, Double> closest = null;
+
+        for (HorizontalMovements movement : movements) {
+            if (!Baritone.settings().allowSprint.value && Arrays.asList(movement.getKeys()).contains(Input.SPRINT)) {
+                continue;
+            }
+
+            simulation.copy(ctx.player());
+            movement.pred(simulation, ctx);
+
+            double distance = simulation.motionX * simulation.motionX + simulation.motionZ * simulation.motionZ;
+
+            if (closest == null || distance < closest.getSecond()) {
+                closest = new Tuple<>(movement, distance);
+            }
+        }
+
+        if (closest != null) {
+            for (Input input : closest.getFirst().getKeys()) {
+                state.setInput(input, true);
+            }
+        }
+    }
+
     static void decreaseMotion(InputOverrideHandler handler, IPlayerContext ctx) {
         PlayerSimulation simulation = new PlayerSimulation(ctx.world());
 

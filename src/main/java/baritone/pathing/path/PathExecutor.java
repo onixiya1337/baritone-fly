@@ -276,6 +276,10 @@ public class PathExecutor implements IPathExecutor, Helper {
 
             IMovement next = path.movements().get(pathPosition + 1);
 
+            if (next instanceof MovementParkour) {
+                return true;
+            }
+
             if (current.getDirection().equals(next.getDirection())) {
                 return false;
             }
@@ -305,6 +309,10 @@ public class PathExecutor implements IPathExecutor, Helper {
 
             if (BaritoneAPI.getSettings().safeMode.value) {
                 IMovement nextNext = path.movements().get(pathPosition + 2);
+
+                if (nextNext instanceof MovementParkour) {
+                    return true;
+                }
 
                 if (next.getDirection().equals(nextNext.getDirection())) {
                     return false;

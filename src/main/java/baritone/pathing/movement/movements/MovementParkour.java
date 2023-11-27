@@ -13,6 +13,7 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
+import baritone.utils.InputOverrideHandler;
 import baritone.utils.pathing.MutableMoveResult;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
@@ -211,11 +212,19 @@ public class MovementParkour extends Movement {
         MovementHelper.rotate(ctx, state, destCenter);
         Rotation required = RotationUtils.calcRotationFromVec3d(ctx.playerHead(), destCenter, ctx.playerRotations());
         if (Math.abs(ctx.playerRotations().subtract(required).normalize().getYaw()) <= Baritone.settings().randomLooking113.value + Baritone.settings().randomLooking.value) {
-            MovementHelper.setInputsAccurate(ctx, state, VecUtils.getBlockPosCenter(dest));
-            // state.setInput(Input.MOVE_FORWARD, true); //FIXME:
+            double dist = ctx.playerFeetAsVec().distanceTo(destCenter);
+            if (dist < 0.5) {
+                MovementHelper.decreaseMotion(state, ctx);
+                state.setInput(Input.SNEAK, true);
+            } else if (dist < 1 && ctx.playerMotion().lengthVector() > 0.15) {
+                state.setInput(Input.MOVE_BACK, true);
+            } else {
+                state.setInput(Input.MOVE_FORWARD, true);
+            }
         }
         if (ctx.playerFeet().equals(dest)) {
-            if (ctx.playerMotion().lengthVector() > 0.3) {
+            if (ctx.playerMotion().lengthVector() > 0.1) {
+                MovementHelper.decreaseMotion(state, ctx);
                 state.setInput(Input.SNEAK, true);
                 return state;
             }
