@@ -16,6 +16,9 @@
 # lwjgl is weird
 -dontwarn org.lwjgl.**
 
+# dont ask me why
+-dontwarn baritone.launch.Login
+
 -keep class baritone.api.** { *; } # this is the keep api
 
 # service provider needs these class names
