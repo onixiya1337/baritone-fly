@@ -49,6 +49,7 @@ minecraft {
     mappings = 'stable_22'
     tweakClass = 'baritone.launch.BaritoneTweaker'
     runDir = 'run'
+    mainClass = 'baritone.launch.Login'
 
     makeObfSourceJar = true
 }
@@ -65,6 +66,7 @@ repositories {
         name = 'impactdevelopment-repo'
         url = 'https://impactdevelopment.github.io/maven/'
     }
+    maven{url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1"}
 }
 
 configurations {
@@ -76,6 +78,7 @@ dependencies {
     extraLibs("it.unimi.dsi:fastutil:7.1.0")
     compile("it.unimi.dsi:fastutil:7.1.0")
     compileOnly("com.google.code.findbugs:jsr305:3.0.1")
+    runtime launchCompile("me.djtheredstoner:DevAuth-forge-legacy:1.1.2")
     runtime launchCompile('com.github.ImpactDevelopment:SimpleTweaker:1.2')
     runtime launchCompile('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
         exclude module: 'launchwrapper'
