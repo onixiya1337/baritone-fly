@@ -279,6 +279,15 @@ public class PathExecutor implements IPathExecutor, Helper {
             if (current.getDirection().equals(next.getDirection())) {
                 return false;
             }
+            Vec3 currentDirVec = new Vec3(current.getDirection());
+            Vec3 nextDirVec = new Vec3(next.getDirection());
+            if (currentDirVec.dotProduct(nextDirVec) <= 0) {
+                return true;
+            }
+
+            if (next instanceof MovementFall) {
+                return true;
+            }
 
             if (next instanceof MovementAscend || next instanceof MovementDescend) {
                 boolean srcSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getSrc()));
@@ -299,6 +308,10 @@ public class PathExecutor implements IPathExecutor, Helper {
 
                 if (next.getDirection().equals(nextNext.getDirection())) {
                     return false;
+                }
+
+                if (nextNext instanceof MovementFall) {
+                    return true;
                 }
 
                 if (nextNext instanceof MovementAscend || nextNext instanceof MovementDescend) {
