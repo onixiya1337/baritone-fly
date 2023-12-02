@@ -19,6 +19,7 @@ public class FlyAStar extends AbstractNodeCostSearch {
 
     private final CalculationContext calcContext;
 
+    @KeepName
     public FlyAStar(int startX, int startY, int startZ, Goal goal, CalculationContext context) {
         super(startX, startY, startZ, goal, context);
         this.calcContext = context;
