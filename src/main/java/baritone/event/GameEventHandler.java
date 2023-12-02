@@ -7,6 +7,7 @@ import baritone.api.event.listener.IEventBus;
 import baritone.api.event.listener.IGameEventListener;
 import baritone.api.pathing.goals.GoalXZ;
 import baritone.api.utils.*;
+import baritone.pathing.calc.FlyAStar;
 import baritone.utils.BlockStateInterface;
 
 import java.util.List;
@@ -43,6 +44,10 @@ public class GameEventHandler implements IEventBus {
         }
 
          */
+        if (false) {
+            FlyAStar flyAStar = new FlyAStar(0, 0, 0, null, null);
+            flyAStar.calculate(0, 0);
+        }
         listeners.forEach(l -> l.onTick(event));
     }
 
