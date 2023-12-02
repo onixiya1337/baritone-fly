@@ -153,7 +153,7 @@ public class Settings {
 
     public final Setting<Boolean> shortBaritonePrefix = new Setting<>(false);
 
-    public final Setting<Boolean> chatDebug = new Setting<>(true);
+    public final Setting<Boolean> chatDebug = new Setting<>(false);
 
     public final Setting<Boolean> desktopNotifications = new Setting<>(false);
 

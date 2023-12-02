@@ -35,11 +35,14 @@ public class GameEventHandler implements IEventBus {
             baritone.bsi = null;
         }
 
+        /*
         IPlayerContext ctx = baritone.getPlayerContext();
         if (ctx.minecraft().gameSettings.keyBindSneak.isPressed()) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().setGoal(new GoalXZ(10000, 50000));
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().findPath(ctx.playerFeet());
         }
+        
+         */
         listeners.forEach(l -> l.onTick(event));
     }
 
