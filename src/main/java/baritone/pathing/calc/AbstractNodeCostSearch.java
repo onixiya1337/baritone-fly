@@ -40,7 +40,7 @@ public abstract class AbstractNodeCostSearch implements IPathFinder, Helper {
 
     protected static final double MIN_IMPROVEMENT = 0.01;
 
-    AbstractNodeCostSearch(int startX, int startY, int startZ, Goal goal, CalculationContext context) {
+    public AbstractNodeCostSearch(int startX, int startY, int startZ, Goal goal, CalculationContext context) {
         this.startX = startX;
         this.startY = startY;
         this.startZ = startZ;
