@@ -141,6 +141,8 @@ public class Settings {
 
     public final Setting<Double> randomLooking = new Setting<>(1d);
 
+    public final Setting<Float> blockReachDistance = new Setting<>(4.5f);
+
     public final Setting<Double> randomLooking113 = new Setting<>(0.1d);
 
     public final Setting<Boolean> freeLook = new Setting<>(false);
@@ -151,7 +153,7 @@ public class Settings {
 
     public final Setting<Boolean> shortBaritonePrefix = new Setting<>(false);
 
-    public final Setting<Boolean> chatDebug = new Setting<>(false);
+    public final Setting<Boolean> chatDebug = new Setting<>(true);
 
     public final Setting<Boolean> desktopNotifications = new Setting<>(false);
 

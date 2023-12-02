@@ -87,6 +87,8 @@ dependencies {
         exclude module: 'commons-io'
         exclude module: 'log4j-core'
     }
+
+    testImplementation 'junit:junit:4.12'
 }
 
 mixin {

@@ -1,7 +1,5 @@
 package baritone.api.utils;
 
-import net.minecraft.util.MathHelper;
-
 import java.util.function.Function;
 
 public class CubicBezier {
