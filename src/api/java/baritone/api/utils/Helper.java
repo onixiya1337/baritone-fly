@@ -69,6 +69,6 @@ public interface Helper {
     }
 
     default void logDirect(String message) {
-        logDirect(message, EnumChatFormatting.GRAY);
+//        logDirect(message, EnumChatFormatting.GRAY);
     }
 }
