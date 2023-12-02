@@ -13,7 +13,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
-@KeepName
 public class CalculationContext {
 
     public final boolean safeForThreadedUse;

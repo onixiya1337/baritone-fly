@@ -8,7 +8,6 @@ import baritone.api.utils.Helper;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.Moves;
-import baritone.pathing.movement.flying.FlyMoves;
 import baritone.pathing.path.CutoffPath;
 import baritone.utils.pathing.PathBase;
 
@@ -79,13 +78,6 @@ class Path extends PathBase {
 
     private Movement runBackwards(BetterBlockPos src, BetterBlockPos dest, double cost) {
         for (Moves moves : Moves.values()) {
-            Movement move = moves.apply0(context, src);
-            if (move.getDest().equals(dest)) {
-                move.override(Math.min(move.calculateCost(context), cost));
-                return move;
-            }
-        }
-        for (FlyMoves moves : FlyMoves.values()) {
             Movement move = moves.apply0(context, src);
             if (move.getDest().equals(dest)) {
                 move.override(Math.min(move.calculateCost(context), cost));

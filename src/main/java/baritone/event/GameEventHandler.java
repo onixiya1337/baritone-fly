@@ -6,8 +6,7 @@ import baritone.api.event.events.*;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.event.listener.IGameEventListener;
 import baritone.api.pathing.goals.GoalXZ;
-import baritone.api.utils.*;
-import baritone.pathing.calc.FlyAStar;
+import baritone.api.utils.IPlayerContext;
 import baritone.utils.BlockStateInterface;
 
 import java.util.List;
@@ -36,18 +35,12 @@ public class GameEventHandler implements IEventBus {
             baritone.bsi = null;
         }
 
-        /*
         IPlayerContext ctx = baritone.getPlayerContext();
         if (ctx.minecraft().gameSettings.keyBindSneak.isPressed()) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().setGoal(new GoalXZ(10000, 50000));
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().findPath(ctx.playerFeet());
         }
 
-         */
-        if (false) {
-            FlyAStar flyAStar = new FlyAStar(0, 0, 0, null, null);
-            flyAStar.calculate(0, 0);
-        }
         listeners.forEach(l -> l.onTick(event));
     }
 
