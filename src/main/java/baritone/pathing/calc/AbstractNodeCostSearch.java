@@ -1,7 +1,6 @@
 package baritone.pathing.calc;
 
 import baritone.Baritone;
-import baritone.KeepName;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.calc.IPathFinder;
 import baritone.api.pathing.goals.Goal;
@@ -13,7 +12,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
 import java.util.Optional;
 
-@KeepName
 public abstract class AbstractNodeCostSearch implements IPathFinder, Helper {
 
     protected final int startX;
