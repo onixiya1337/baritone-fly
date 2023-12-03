@@ -105,7 +105,7 @@ public class Settings {
 
     public final Setting<Boolean> renderPath = new Setting<>(true);
 
-    public final Setting<Integer> movementTimeoutTicks = new Setting<>(100);
+    public final Setting<Integer> movementTimeoutTicks = new Setting<>(600);
 
     public final Setting<Integer> costVerificationLookahead = new Setting<>(5);
 
