@@ -252,7 +252,7 @@ public class LookBehavior extends Behavior implements ILookBehavior {
             if (yawProgress < 0) {
                 yawProgress = 0;
             }
-            float interpolatedYaw = (float) (initial.getYaw() + yawBezier.value(yawProgress) * delta.getYaw());
+            float interpolatedYaw = (float) (initial.getYaw() + yawBezier.value(yawProgress) * delta.getYaw()); //TODO: the shit (factor) is to sensitive aswell
 
             double pitchProgress = calculateXForY(pitchBezier, deltaInitial.getPitch() / delta.getPitch());
             pitchProgress = Math.ceil(pitchProgress * 10) / 10d + Baritone.settings().pitchSmoothingFactor.value;
