@@ -7,11 +7,14 @@ import baritone.api.behavior.look.IAimProcessor;
 import baritone.api.behavior.look.ITickableAimProcessor;
 import baritone.api.event.events.*;
 import baritone.api.utils.CubicBezier;
+import baritone.api.utils.Helper;
 import baritone.api.utils.IPlayerContext;
-import baritone.api.utils.Interpolator;
 import baritone.api.utils.Rotation;
 import baritone.behavior.look.ForkableRandom;
 import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.util.MathHelper;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import java.util.Optional;
 
@@ -25,14 +28,18 @@ public class LookBehavior extends Behavior implements ILookBehavior {
 
     private final AimProcessor processor;
 
+    private boolean updated;
+
     public LookBehavior(Baritone baritone) {
         super(baritone);
         this.processor = new AimProcessor(baritone.getPlayerContext());
+        this.updated = false;
     }
 
     @Override
     public void updateTarget(Rotation rotation, boolean blockInteract) {
         this.target = new Target(ctx.playerRotations(), rotation, Target.Mode.resolve(blockInteract));
+        this.updated = true;
     }
 
 
@@ -69,8 +76,7 @@ public class LookBehavior extends Behavior implements ILookBehavior {
             }
             case POST: {
                 if (this.prevRotation != null) {
-
-                    if (this.target.mode == Target.Mode.SERVER) {
+                    if (this.target.mode == Target.Mode.SERVER && this.updated) {
                         ctx.player().rotationYaw = prevRotation.getYaw();
                         ctx.player().rotationPitch = prevRotation.getPitch();
                     }
@@ -78,12 +84,12 @@ public class LookBehavior extends Behavior implements ILookBehavior {
                     this.prevRotation = null;
                 }
 
-                final Rotation interpolated = this.processor.interpolate(this.target.initial, this.target.rotation);
-                Rotation delta = interpolated.subtract(target.rotation).normalizeAndClamp();
-                if (Math.abs(delta.getYaw()) < Baritone.settings().randomLooking.value + Baritone.settings().randomLooking113.value &&
-                        Math.abs(delta.getPitch()) < Baritone.settings().randomLooking.value) {
+                if (!this.updated) {
                     this.target = null;
                 }
+
+                this.updated = false;
+
                 break;
             }
             default: {
@@ -139,6 +145,27 @@ public class LookBehavior extends Behavior implements ILookBehavior {
         }
     }
 
+    private static double calculateXForY(PolynomialSplineFunction bezierCurve, double targetY) {
+        double epsilon = 1e-6;
+
+        double x = 0.5;
+        double yValue = bezierCurve.value(x);
+        double derivative = bezierCurve.derivative().value(x);
+
+        while (Math.abs(yValue - targetY) > epsilon) {
+            x = x - (yValue - targetY) / derivative;
+            if (x > 1) {
+                return 1;
+            }
+            if (x < 0) {
+                return 0;
+            }
+            yValue = bezierCurve.value(x);
+            derivative = bezierCurve.derivative().value(x);
+        }
+        return x;
+    }
+
     private static abstract class AbstractAimProcessor implements ITickableAimProcessor {
 
         protected final IPlayerContext ctx;
@@ -147,10 +174,38 @@ public class LookBehavior extends Behavior implements ILookBehavior {
         private double randomYawOffset;
         private double randomPitchOffset;
 
+        private final PolynomialSplineFunction yawBezier;
+        private final PolynomialSplineFunction pitchBezier;
+
 
         public AbstractAimProcessor(IPlayerContext ctx) {
             this.ctx = ctx;
             this.rand = new ForkableRandom();
+
+            CubicBezier yawBezier = new CubicBezier(0.56, 0.17, 0.29, 1); // TODO: Custom beziers perhaps fitting
+
+            double[] yawX = new double[11];
+            double[] yawY = new double[11];
+
+            for (int i = 0; i < 11; i++) {
+                float x = ((float) i) / 10f;
+                yawX[i] = x;
+                yawY[i] = yawBezier.calculateYWithX(x);
+            }
+
+            this.yawBezier = new SplineInterpolator().interpolate(yawX, yawY);
+
+            CubicBezier pitchBezier = new CubicBezier(0.22,1, 0.36,1);
+            double[] pitchX = new double[11];
+            double[] pitchY = new double[11];
+
+            for (int i = 0; i < 11; i++) {
+                float x = ((float) i) / 10f;
+                pitchX[i] = x;
+                pitchY[i] = pitchBezier.calculateYWithX(x);
+            }
+
+            this.pitchBezier = new SplineInterpolator().interpolate(pitchX, pitchY);
         }
 
         private AbstractAimProcessor(final AbstractAimProcessor source) {
@@ -158,6 +213,8 @@ public class LookBehavior extends Behavior implements ILookBehavior {
             this.rand = source.rand.fork();
             this.randomYawOffset = source.randomYawOffset;
             this.randomPitchOffset = source.randomPitchOffset;
+            this.yawBezier = source.yawBezier;
+            this.pitchBezier = source.pitchBezier;
         }
 
         @Override
@@ -184,38 +241,32 @@ public class LookBehavior extends Behavior implements ILookBehavior {
         public final Rotation interpolate(final Rotation initial, final Rotation rotation) {
             final Rotation prev = this.getPrevRotation();
 
-            float yawSmoothingFactor = Baritone.settings().yawSmoothingFactor.value;
-            float pitchSmoothingFactor = Baritone.settings().pitchSmoothingFactor.value;
-
+            Rotation deltaInitial = prev.subtract(initial).normalizeAndClamp();
             Rotation delta = rotation.subtract(initial).normalizeAndClamp();
 
-            if (Math.abs(delta.getYaw()) > 45) {
-                yawSmoothingFactor *= 2;
-            } else if (Math.abs(delta.getYaw()) > 90) {
-                yawSmoothingFactor *= 3;
+            double yawProgress = calculateXForY(yawBezier, deltaInitial.getYaw() / delta.getYaw());
+            yawProgress = Math.ceil(yawProgress * 10) / 10d + Baritone.settings().yawSmoothingFactor.value; // TODO: manage to get this with ticks instead of a factor somehow
+            if (yawProgress > 1) {
+                yawProgress = 1;
             }
-            if (Math.abs(delta.getPitch()) > 45) {
-                pitchSmoothingFactor *= 2;
+            if (yawProgress < 0) {
+                yawProgress = 0;
             }
+            float interpolatedYaw = (float) (initial.getYaw() + yawBezier.value(yawProgress) * delta.getYaw()); //TODO: the shit (factor) is to sensitive aswell
 
-            float yawProgress = Math.abs(Rotation.normalizeYaw(rotation.getYaw() - initial.getYaw()) / delta.getYaw());
-            float yawInterpolation = new CubicBezier(0.42,0.04,0.55,0.96).calculateYWithX(yawProgress);
-
-            float pitchProgress = Math.abs(Rotation.clampPitch(rotation.getPitch() - initial.getPitch()) / delta.getPitch());
-            float pitchInterpolation = new CubicBezier(0.33, 1, 0.68, 1).calculateYWithX(pitchProgress);
-
-            float desiredYaw = initial.getYaw() + delta.getYaw() * yawInterpolation;
-            float desiredPitch = initial.getPitch() + delta.getPitch() * pitchInterpolation;
-
-            float deltaYaw = Rotation.normalizeYaw(desiredYaw - prev.getYaw());
-            deltaYaw /= yawSmoothingFactor;
-
-            float deltaPitch = Rotation.clampPitch(desiredPitch - prev.getPitch());
-            deltaPitch /= pitchSmoothingFactor;
+            double pitchProgress = calculateXForY(pitchBezier, deltaInitial.getPitch() / delta.getPitch());
+            pitchProgress = Math.ceil(pitchProgress * 10) / 10d + Baritone.settings().pitchSmoothingFactor.value;
+            if (pitchProgress > 1) {
+                pitchProgress = 1;
+            }
+            if (pitchProgress < 0) {
+                pitchProgress = 0;
+            }
+            float interpolatedPitch = (float) (initial.getPitch() + pitchBezier.value(pitchProgress) * delta.getPitch());
 
             return new Rotation(
-                    this.calculateMouseMove(prev.getYaw(), prev.getYaw() + deltaYaw),
-                    this.calculateMouseMove(prev.getPitch(), prev.getPitch() + deltaPitch)
+                    this.calculateMouseMove(prev.getYaw(), interpolatedYaw),
+                    this.calculateMouseMove(prev.getPitch(), interpolatedPitch)
             ).clamp();
         }
 

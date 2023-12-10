@@ -419,7 +419,7 @@ public interface MovementHelper extends ActionCosts, Helper {
                 continue;
             }
 
-            simulation.copy(ctx.player());
+            simulation.copy(ctx.player(), ctx);
             Vec3 prediction = movement.pred(simulation, ctx);
 
             double distance = prediction.distanceTo(dest);
@@ -453,7 +453,7 @@ public interface MovementHelper extends ActionCosts, Helper {
                     continue;
                 }
 
-                simulation.copy(ctx.player());
+                simulation.copy(ctx.player(), ctx);
                 movement.pred(simulation, ctx);
                 Vec3 prediction = nextMovement.pred(simulation, ctx);
 
@@ -484,7 +484,7 @@ public interface MovementHelper extends ActionCosts, Helper {
                 continue;
             }
 
-            simulation.copy(ctx.player());
+            simulation.copy(ctx.player(), ctx);
             movement.pred(simulation, ctx);
 
             double distance = simulation.motionX * simulation.motionX + simulation.motionZ * simulation.motionZ;
@@ -513,7 +513,7 @@ public interface MovementHelper extends ActionCosts, Helper {
                 continue;
             }
 
-            simulation.copy(ctx.player());
+            simulation.copy(ctx.player(), ctx);
             movement.pred(simulation, ctx);
 
             double distance = simulation.motionX * simulation.motionX + simulation.motionZ * simulation.motionZ;

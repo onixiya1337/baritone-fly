@@ -1,6 +1,7 @@
 package baritone.utils;
 
 import baritone.api.BaritoneAPI;
+import baritone.api.utils.IPlayerContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
@@ -55,7 +56,7 @@ public class PlayerSimulation {
         this.worldObj = world;
     }
 
-    public void copy(EntityLivingBase entity) {
+    public void copy(EntityLivingBase entity, IPlayerContext ctx) {
         posX = entity.posX;
         posY = entity.posY;
         posZ = entity.posZ;
@@ -70,7 +71,7 @@ public class PlayerSimulation {
         isCollided = entity.isCollided;
         isCollidedHorizontally = entity.isCollidedHorizontally;
         isCollidedVertically = entity.isCollidedVertically;
-        rotationYaw = entity.rotationYaw;
+        rotationYaw = ctx.playerRotations().getYaw();
         noClip = entity.noClip;
         isSneaking = entity.isSneaking();
         stepHeight = entity.stepHeight;

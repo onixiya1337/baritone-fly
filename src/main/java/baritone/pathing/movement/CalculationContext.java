@@ -1,6 +1,7 @@
 package baritone.pathing.movement;
 
 import baritone.Baritone;
+import baritone.KeepName;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.ActionCosts;
 import baritone.pathing.precompute.PrecomputedData;

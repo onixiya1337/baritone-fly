@@ -155,7 +155,11 @@ public class PathExecutor implements IPathExecutor, Helper {
             return true;
         } else {
             if (BaritoneAPI.getSettings().safeMode.value && movement instanceof MovementDescend) {
-                ((MovementDescend) movement).forceSafeMode();
+                boolean srcSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(movement.getSrc().down()));
+                boolean destSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(movement.getDest().down()));
+                if (srcSlab == destSlab) {
+                    ((MovementDescend) movement).forceSafeMode();
+                }
             }
             if (decrease()) {
                 MovementHelper.decreaseMotion(behavior.baritone.getInputOverrideHandler(), ctx);
@@ -294,8 +298,8 @@ public class PathExecutor implements IPathExecutor, Helper {
             }
 
             if (next instanceof MovementAscend || next instanceof MovementDescend) {
-                boolean srcSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getSrc()));
-                boolean destSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getDest()));
+                boolean srcSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getSrc().down()));
+                boolean destSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getDest().down()));
                 if (srcSlab ^ destSlab) {
                     return true;
                 }
@@ -323,8 +327,8 @@ public class PathExecutor implements IPathExecutor, Helper {
                 }
 
                 if (nextNext instanceof MovementAscend || nextNext instanceof MovementDescend) {
-                    boolean srcSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getSrc()));
-                    boolean destSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getDest()));
+                    boolean srcSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getSrc().down()));
+                    boolean destSlab = MovementHelper.isBottomSlab(ctx.world().getBlockState(next.getDest().down()));
                     if (srcSlab ^ destSlab) {
                         return true;
                     }
