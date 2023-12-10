@@ -4,7 +4,8 @@ import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.calc.IPathFinder;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.path.IPathExecutor;
-import baritone.api.utils.BetterBlockPos;
+import baritone.api.process.PathingCommand;
+import net.minecraft.util.BlockPos;
 
 import java.util.Optional;
 
@@ -28,6 +29,7 @@ public interface IPathingBehavior extends IBehavior {
     Goal getGoal();
 
     boolean isPathing();
+    boolean secretInternalSetGoalAndPath(PathingCommand command);
 
     default boolean hasPath() {
         return getCurrent() != null;

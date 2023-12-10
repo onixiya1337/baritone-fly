@@ -238,6 +238,7 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
         this.goal = goal;
     }
 
+    @Override
     public boolean secretInternalSetGoalAndPath(PathingCommand command) {
         secretInternalSetGoal(command.goal);
         if (command instanceof PathingCommandContext) {
