@@ -65,15 +65,15 @@ public class Settings {
 
     public final Setting<Float> pathingMapLoadFactor = new Setting<>(0.75f);
 
-    public final Setting<Boolean> allowParkour = new Setting<>(true);
+    public final Setting<Boolean> allowParkour = new Setting<>(false);
 
     public final Setting<Boolean> allowJumpAt256 = new Setting<>(true);
 
-    public final Setting<Boolean> allowParkourAscend = new Setting<>(true);
+    public final Setting<Boolean> allowParkourAscend = new Setting<>(false);
 
-    public final Setting<Float> yawSmoothingFactor = new Setting<>(4f);
+    public final Setting<Float> yawSmoothingFactor = new Setting<>(0.2f);
 
-    public final Setting<Float> pitchSmoothingFactor = new Setting<>(2f);
+    public final Setting<Float> pitchSmoothingFactor = new Setting<>(0.22f);
 
     public final Setting<Boolean> safeMode = new Setting<>(true);
 
@@ -139,11 +139,11 @@ public class Settings {
 
     public final Setting<Boolean> pathThroughCachedOnly = new Setting<>(false);
 
-    public final Setting<Double> randomLooking = new Setting<>(1d);
+    public final Setting<Double> randomLooking = new Setting<>(0d);
 
     public final Setting<Float> blockReachDistance = new Setting<>(4.5f);
 
-    public final Setting<Double> randomLooking113 = new Setting<>(0.1d);
+    public final Setting<Double> randomLooking113 = new Setting<>(0d);
 
     public final Setting<Boolean> freeLook = new Setting<>(false);
 

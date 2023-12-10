@@ -136,7 +136,7 @@ public enum HorizontalMovements {
 
         PlayerSimulation sim = new PlayerSimulation(ctx.world());
 
-        sim.copy(ctx.player());
+        sim.copy(ctx.player(), ctx);
 
         sim.moveForward = moveForward;
         sim.moveStrafing = moveStrafe;

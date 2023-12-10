@@ -76,6 +76,7 @@
 -libraryjars 'tempLibraries/jopt-simple-4.6.jar'
 -libraryjars 'tempLibraries/jsr305-3.0.1.jar'
 -libraryjars 'tempLibraries/jutils-1.0.0.jar'
+-libraryjars 'tempLibraries/commons-math3-3.6.jar'
 -libraryjars 'tempLibraries/libraryjavasound-20101123.jar'
 -libraryjars 'tempLibraries/librarylwjglopenal-20100824.jar'
 -libraryjars 'tempLibraries/log4j-api-2.0-beta9.jar'
