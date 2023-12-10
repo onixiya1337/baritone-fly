@@ -1,5 +1,6 @@
 package baritone.api.behavior;
 
+import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.calc.IPathFinder;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.path.IPathExecutor;
@@ -22,13 +23,9 @@ public interface IPathingBehavior extends IBehavior {
         return Optional.of(current.getPath().ticksRemainingFrom(start));
     }
 
+    Optional<Double> estimatedTicksToGoal();
+
     Goal getGoal();
-
-    void setGoal(Goal goal);
-
-    void cancelEverything();
-
-    void findPath(BetterBlockPos start);
 
     boolean isPathing();
 
@@ -36,7 +33,17 @@ public interface IPathingBehavior extends IBehavior {
         return getCurrent() != null;
     }
 
+    boolean cancelEverything();
+
+    void forceCancel();
+
+    default Optional<IPath> getPath() {
+        return Optional.ofNullable(getCurrent()).map(IPathExecutor::getPath);
+    }
+
     Optional<? extends IPathFinder> getInProgress();
 
     IPathExecutor getCurrent();
+
+    IPathExecutor getNext();
 }

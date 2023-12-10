@@ -39,4 +39,7 @@ public interface AbstractGameEventListener extends IGameEventListener {
 
     @Override
     default void onBlockInteract(BlockInteractEvent event) {}
+
+    @Override
+    default void onPathEvent(PathEvent event) {}
 }

@@ -169,3 +169,11 @@ install {
 }
 
 install.dependsOn(build)
+
+javadoc {
+    options.addStringOption('Xwerror', '-quiet')
+    options.linkSource true
+    options.encoding "UTF-8"
+    source = sourceSets.api.allJava
+    classpath += sourceSets.api.compileClasspath
+}

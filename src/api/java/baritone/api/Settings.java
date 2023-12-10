@@ -22,6 +22,8 @@ import java.util.function.Consumer;
 
 public class Settings {
 
+    public final Setting<Boolean> splicePath = new Setting<>(true);
+
     public final Setting<Double> maxYawOffsetForForward = new Setting<>(15d);
 
     public final Setting<Boolean> checkOvershootParkour = new Setting<>(true);

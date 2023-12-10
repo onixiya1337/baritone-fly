@@ -6,10 +6,18 @@ import baritone.api.event.events.*;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.event.listener.IGameEventListener;
 import baritone.api.pathing.goals.GoalXZ;
-import baritone.api.utils.*;
-import baritone.pathing.calc.FlyAStar;
+import baritone.api.process.PathingCommand;
+import baritone.api.process.PathingCommandType;
+import baritone.api.utils.Helper;
+import baritone.api.utils.IPlayerContext;
+import baritone.behavior.PathingBehavior;
 import baritone.utils.BlockStateInterface;
+import baritone.utils.PathingCommandContext;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -36,18 +44,22 @@ public class GameEventHandler implements IEventBus {
             baritone.bsi = null;
         }
 
+
         /*
+
         IPlayerContext ctx = baritone.getPlayerContext();
-        if (ctx.minecraft().gameSettings.keyBindSneak.isPressed()) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().setGoal(new GoalXZ(10000, 50000));
-            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().findPath(ctx.playerFeet());
+        PathingBehavior behavior = (PathingBehavior) BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior();
+
+        if (ctx.minecraft().gameSettings.keyBindJump.isPressed()) {
+            behavior.cancelEverything();
         }
 
-         */
-        if (false) {
-            FlyAStar flyAStar = new FlyAStar(0, 0, 0, null, null);
-            flyAStar.calculate(0, 0);
+        if (ctx.minecraft().gameSettings.keyBindSneak.isPressed()) {
+            behavior.secretInternalSetGoalAndPath(new PathingCommand(new GoalXZ(10000, 50000), PathingCommandType.SET_GOAL_AND_PATH));
         }
+        
+         */
+
         listeners.forEach(l -> l.onTick(event));
     }
 
@@ -104,6 +116,11 @@ public class GameEventHandler implements IEventBus {
     @Override
     public void onBlockInteract(BlockInteractEvent event) {
         listeners.forEach(l -> l.onBlockInteract(event));
+    }
+
+    @Override
+    public void onPathEvent(PathEvent event) {
+        listeners.forEach(l -> l.onPathEvent(event));
     }
 
     @Override

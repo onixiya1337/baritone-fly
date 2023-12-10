@@ -27,4 +27,6 @@ public interface IGameEventListener {
     void onPlayerSprintState(SprintStateEvent event);
 
     void onBlockInteract(BlockInteractEvent event);
+
+    void onPathEvent(PathEvent event);
 }
