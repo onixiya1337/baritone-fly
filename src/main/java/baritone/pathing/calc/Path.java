@@ -1,5 +1,6 @@
 package baritone.pathing.calc;
 
+import baritone.Baritone;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.movement.IMovement;
@@ -67,11 +68,20 @@ class Path extends PathBase {
         }
         for (int i = 0; i < path.size() - 1; i++) {
             double cost = nodes.get(i + 1).cost - nodes.get(i).cost;
-            Movement move = runBackwards(path.get(i), path.get(i + 1), cost);
-            if (move == null) {
-                return true;
+            if (Baritone.settings().flyInstead.value) {
+                Movement flyMove = flyBackwards(path.get(i), path.get(i + 1), cost);
+                if (flyMove == null) {
+                    return true;
+                } else {
+                    movements.add(flyMove);
+                }
             } else {
-                movements.add(move);
+                Movement move = runBackwards(path.get(i), path.get(i + 1), cost);
+                if (move == null) {
+                    return true;
+                } else {
+                    movements.add(move);
+                }
             }
         }
         return false;
@@ -85,14 +95,19 @@ class Path extends PathBase {
                 return move;
             }
         }
-        for (FlyMoves moves : FlyMoves.values()) {
-            Movement move = moves.apply0(context, src);
-            if (move.getDest().equals(dest)) {
-                move.override(Math.min(move.calculateCost(context), cost));
-                return move;
+        Helper.HELPER.logDebug("Movement became impossible during calculation " + src + " " + dest + " " + dest.subtract(src));
+        return null;
+    }
+
+    private Movement flyBackwards(BetterBlockPos src, BetterBlockPos dest, double cost) {
+        for (FlyMoves flyMoves : FlyMoves.values()) {
+            Movement flyMove = flyMoves.apply0(context, src);
+            if (flyMove.getDest().equals(dest)) {
+                flyMove.override(Math.min(flyMove.calculateCost(context), cost));
+                return flyMove;
             }
         }
-        Helper.HELPER.logDebug("Movement became impossible during calculation " + src + " " + dest + " " + dest.subtract(src));
+        Helper.HELPER.logDebug("Fly movement became impossible during calculation " + src + " " + dest + " " + dest.subtract(src));
         return null;
     }
 

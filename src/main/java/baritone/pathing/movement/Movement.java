@@ -1,5 +1,7 @@
 package baritone.pathing.movement;
 
+import baritone.Baritone;
+import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.IMovement;
 import baritone.api.pathing.movement.MovementStatus;
@@ -76,7 +78,7 @@ public abstract class Movement implements IMovement, MovementHelper {
             return currentState.getStatus();
         }
 
-        ctx.player().capabilities.isFlying = false;
+        ctx.player().capabilities.isFlying = BaritoneAPI.getSettings().flyInstead.value && !ctx.player().capabilities.isFlying && ctx.player().capabilities.allowFlying;
         currentState = updateState(currentState);
         if (MovementHelper.isLiquid(ctx, ctx.playerFeet())) {
             currentState.setInput(Input.JUMP, true);

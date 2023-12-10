@@ -30,6 +30,8 @@ public interface IPathingBehavior extends IBehavior {
 
     void findPath(BetterBlockPos start);
 
+    void findFlyPath(BetterBlockPos start);
+
     boolean isPathing();
 
     default boolean hasPath() {

@@ -32,7 +32,7 @@ public class Settings {
 
     public final Setting<Boolean> allowOvershootDiagonalDescend = new Setting<>(false);
 
-    public final Setting<Boolean> sprintAscends = new Setting<>(true);
+    public final Setting<Boolean> sprintAscends = new Setting<>(false);
 
     public final Setting<Double> maxCostIncrease = new Setting<>(10D);
 
@@ -93,7 +93,7 @@ public class Settings {
 
     public final Setting<Boolean> allowDownward = new Setting<>(true);
 
-    public final Setting<Boolean> allowSprint = new Setting<>(true);
+    public final Setting<Boolean> allowSprint = new Setting<>(false);
 
     public final Setting<Boolean> renderPathIgnoreDepth = new Setting<>(true);
 
@@ -133,6 +133,8 @@ public class Settings {
 
     public final Setting<Boolean> disconnectOnArrival = new Setting<>(false);
 
+    public final Setting<Boolean> flyInstead = new Setting<>(true);
+
     public final Setting<Double> costHeuristic = new Setting<>(3.563);
 
     public final Setting<Integer> axisHeight = new Setting<>(120);
@@ -153,7 +155,7 @@ public class Settings {
 
     public final Setting<Boolean> shortBaritonePrefix = new Setting<>(false);
 
-    public final Setting<Boolean> chatDebug = new Setting<>(true);
+    public final Setting<Boolean> chatDebug = new Setting<>(false);
 
     public final Setting<Boolean> desktopNotifications = new Setting<>(false);
 

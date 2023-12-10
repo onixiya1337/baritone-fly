@@ -1,5 +1,6 @@
 package baritone.pathing.movement.flying.flyMovements;
 
+import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
@@ -9,6 +10,7 @@ import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
 
 import java.util.Set;
 
@@ -47,6 +49,14 @@ public class MovementFlyDown extends Movement {
         super.updateState(state);
         if (state.getStatus() != MovementStatus.RUNNING) {
             return state;
+        }
+
+        BlockPos feet = ctx.playerFeet();
+        if (Baritone.settings().overshootTraverse.value && (feet.equals(dest.add(getDirection())) || feet.equals(dest.add(getDirection()).add(getDirection())))) {
+            return state.setStatus(MovementStatus.SUCCESS);
+        }
+        if (feet.equals(dest)) {
+            return state.setStatus(MovementStatus.SUCCESS);
         }
 
         return state;

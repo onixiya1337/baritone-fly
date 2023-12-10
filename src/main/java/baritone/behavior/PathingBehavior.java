@@ -14,6 +14,7 @@ import baritone.api.utils.PathCalculationResult;
 import baritone.api.utils.interfaces.IGoalRenderPos;
 import baritone.pathing.calc.AStarPathFinder;
 import baritone.pathing.calc.AbstractNodeCostSearch;
+import baritone.pathing.calc.FlyAStar;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.path.PathExecutor;
 import baritone.utils.PathRenderer;
@@ -124,6 +125,49 @@ public class PathingBehavior extends Behavior implements IPathingBehavior, Helpe
         });
     }
 
+    @Override
+    public void findFlyPath(BetterBlockPos start) {
+        context = new CalculationContext(baritone, true);
+        long primaryTimeout;
+        long failureTimeout;
+        if (current == null) {
+            primaryTimeout = Baritone.settings().primaryTimeoutMS.value;
+            failureTimeout = Baritone.settings().failureTimeoutMS.value;
+        } else {
+            primaryTimeout = Baritone.settings().planAheadPrimaryTimeoutMS.value;
+            failureTimeout = Baritone.settings().planAheadFailureTimeoutMS.value;
+        }
+        AbstractNodeCostSearch pathfinder = createFlyPathfinder(start, goal, current == null ? null : current.getPath(), context);
+        if (!Objects.equals(pathfinder.getGoal(), goal)) {
+            logDebug("Simplifying " + goal.getClass() + " to GoalXZ due to distance");
+        }
+
+        Baritone.getExecutor().execute(() -> {
+            logDebug("Starting to search for path from " + start + " to " + goal);
+
+            PathCalculationResult calcResult = pathfinder.calculate(primaryTimeout, failureTimeout);
+            synchronized (pathPlanLock) {
+                Optional<PathExecutor> executor = calcResult.getPath().map(p -> new PathExecutor(PathingBehavior.this, p));
+                if (current == null) {
+                    if (executor.isPresent()) {
+                        current = executor.get();
+                    }
+                } else {
+                    if (next == null) {
+                        if (executor.isPresent()) {
+                            next = executor.get();
+                        }
+                    } else {
+                        logDirect("Warning: PathingBehaivor illegal state! Discarding invalid path!");
+                    }
+                }
+                synchronized (pathCalcLock) {
+                    inProgress = null;
+                }
+            }
+        });
+    }
+
     private static AbstractNodeCostSearch createPathfinder(BlockPos start, Goal goal, IPath previous, CalculationContext context) {
         Goal transformed = goal;
         if (Baritone.settings().simplifyUnloadedYCoord.value && goal instanceof IGoalRenderPos) {
@@ -133,6 +177,17 @@ public class PathingBehavior extends Behavior implements IPathingBehavior, Helpe
             }
         }
         return new AStarPathFinder(start.getX(), start.getY(), start.getZ(), transformed, context);
+    }
+
+    private static AbstractNodeCostSearch createFlyPathfinder(BlockPos start, Goal goal, IPath previous, CalculationContext context) {
+        Goal transformed = goal;
+        if (Baritone.settings().simplifyUnloadedYCoord.value && goal instanceof IGoalRenderPos) {
+            BlockPos pos = ((IGoalRenderPos) goal).getGoalPos();
+            if (!context.bsi.worldContainsLoadedChunk(pos.getX(), pos.getZ())) {
+                transformed = new GoalXZ(pos.getX(), pos.getZ());
+            }
+        }
+        return new FlyAStar(start.getX(), start.getY(), start.getZ(), transformed, context);
     }
 
     @Override
@@ -197,7 +252,10 @@ public class PathingBehavior extends Behavior implements IPathingBehavior, Helpe
             if (ticksRemainingInSegment.isPresent() && ticksRemainingInSegment.get() < Baritone.settings().planningTickLookahead.value) {
                 logDebug("Path almost over. Planning ahead");
 
-                findPath(current.getPath().getDest());
+                if (Baritone.settings().flyInstead.value)
+                    findFlyPath(current.getPath().getDest());
+                else
+                    findPath(current.getPath().getDest());
             }
         }
     }
