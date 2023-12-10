@@ -38,6 +38,10 @@ public class Settings {
 
     public final Setting<Double> pathCutoffFactor = new Setting<>(0.9);
 
+    public final Setting<Double> maxDistFromPath = new Setting<>(3.0);
+
+    public final Setting<Double> maxMaxDistFromPath = new Setting<>(4.0);
+
     public final Setting<Integer> pathCutoffMinimumLength = new Setting<>(30);
 
 
