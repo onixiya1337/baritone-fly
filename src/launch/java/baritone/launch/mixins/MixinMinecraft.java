@@ -116,28 +116,28 @@ public class MixinMinecraft {
         );
     }
 
-    @Inject(
-            method = "clickMouse",
-            at = @At(
-                    value = "INVOKE",
-                    target = "net/minecraft/client/multiplayer/PlayerControllerMP.clickBlock(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
-            ),
-            locals = LocalCapture.CAPTURE_FAILHARD
-    )
-    private void onBlockBreak(CallbackInfo ci, BlockPos pos) {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getGameEventHandler().onBlockInteract(new BlockInteractEvent(pos, BlockInteractEvent.Type.START_BREAK));
-    }
-
-    @Inject(
-            method = "rightClickMouse",
-            at = @At(
-                    value = "INVOKE",
-                    target = "net/minecraft/client/entity/EntityPlayerSP.swingItem()V"
-            ),
-            locals = LocalCapture.CAPTURE_FAILHARD
-    )
-    private void onBlockUse(CallbackInfo ci, boolean noAction, ItemStack itemStack, BlockPos pos, int stackSize) {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getGameEventHandler().onBlockInteract(new BlockInteractEvent(pos, BlockInteractEvent.Type.USE));
-    }
+//    @Inject(
+//            method = "clickMouse",
+//            at = @At(
+//                    value = "INVOKE",
+//                    target = "net/minecraft/client/multiplayer/PlayerControllerMP.clickBlock(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
+//            ),
+//            locals = LocalCapture.CAPTURE_FAILHARD
+//    )
+//    private void onBlockBreak(CallbackInfo ci, BlockPos pos) {
+//        BaritoneAPI.getProvider().getPrimaryBaritone().getGameEventHandler().onBlockInteract(new BlockInteractEvent(pos, BlockInteractEvent.Type.START_BREAK));
+//    }
+//
+//    @Inject(
+//            method = "rightClickMouse",
+//            at = @At(
+//                    value = "INVOKE",
+//                    target = "net/minecraft/client/entity/EntityPlayerSP.swingItem()V"
+//            ),
+//            locals = LocalCapture.CAPTURE_FAILHARD
+//    )
+//    private void onBlockUse(CallbackInfo ci, boolean noAction, ItemStack itemStack, BlockPos pos, int stackSize) {
+//        BaritoneAPI.getProvider().getPrimaryBaritone().getGameEventHandler().onBlockInteract(new BlockInteractEvent(pos, BlockInteractEvent.Type.USE));
+//    }
 }
 

@@ -1,6 +1,6 @@
-31d1e4c533457c1cdb6d37bf755fe69920910e4a  baritone-api-1.0.0.jar
-b2a16f2d1e0054104650bca60a20046879a2e14a  baritone-deobf-1.0.0.jar
-dadf3cf8a589b19c072958a9d655b494318adc13  baritone-api-forge-1.0.0.jar
-f393d668386d305a843cbfa08a489d1c55fba79e  baritone-standalone-1.0.0.jar
-df6545605712832b4056f5a826c8c3b8118486e7  baritone-standalone-forge-1.0.0.jar
-c5260c519ea88403f0d7860fc8f176b7b420729c  baritone-unoptimized-1.0.0.jar
+ad3d2c4e422bcf1e0cc8bfca8cb0ad5d7a73b6e3  baritone-api-1.0.0.jar
+17b3cbe02e0d37e980a7c65b04698692a680eff5  baritone-deobf-1.0.0.jar
+60e9ee9e357636d1a6ad4a43a18c62a099add534  baritone-api-forge-1.0.0.jar
+689197faa2dda7179e97f8d7f9d011fdc1712d34  baritone-standalone-1.0.0.jar
+222000c72252ec940393274ec73f549df8f3f380  baritone-standalone-forge-1.0.0.jar
+ee4d271ef6b985660d08f86c0916bb08f5b43f99  baritone-unoptimized-1.0.0.jar
