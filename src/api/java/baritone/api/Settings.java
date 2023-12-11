@@ -79,7 +79,7 @@ public class Settings {
 
     public final Setting<Float> yawSmoothingFactor = new Setting<>(0.2f);
 
-    public final Setting<Float> pitchSmoothingFactor = new Setting<>(0.22f);
+    public final Setting<Float> pitchSmoothingFactor = new Setting<>(0.2f);
 
     public final Setting<Boolean> safeMode = new Setting<>(true);
 

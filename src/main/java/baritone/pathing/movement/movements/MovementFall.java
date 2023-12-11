@@ -62,11 +62,12 @@ public class MovementFall extends Movement {
 
         BlockPos playerFeet = ctx.playerFeet();
 
+        Rotation target = RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
+                VecUtils.getBlockPosCenter(dest),
+                ctx.playerRotations()).withPitch(ctx.playerRotations().getPitch());
+
         state.setTarget(new MovementState.MovementTarget(
-                RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
-                        VecUtils.getBlockPosCenter(dest),
-                        ctx.playerRotations()),
-                false));
+                target, false));
 
         IBlockState destState = ctx.world().getBlockState(dest);
         Block destBlock = destState.getBlock();
@@ -88,7 +89,7 @@ public class MovementFall extends Movement {
                 state.setInput(Input.SNEAK, true);
             }
 
-            MovementHelper.setInputs(ctx, state, destCenter);
+            MovementHelper.setInputsAccurate(ctx, state, destCenter);
             //TODO:  Move towards (only keys) dest
         }
         Vec3i avoid = Optional.ofNullable(avoid()).map(EnumFacing::getDirectionVec).orElse(null);
@@ -97,7 +98,7 @@ public class MovementFall extends Movement {
         } else {
             double dist = Math.abs(avoid.getX() * (destCenter.xCoord - avoid.getX() / 2.0 - ctx.playerFeetAsVec().xCoord)) + Math.abs(avoid.getZ() * (destCenter.zCoord - avoid.getZ() / 2.0 - ctx.playerFeetAsVec().zCoord));
             if (dist < 0.6) {
-                MovementHelper.setInputs(ctx, state, destCenter);
+                MovementHelper.setInputsAccurate(ctx, state, destCenter);
                 //TODO:  move towards (only keys) dest
             } else if (!ctx.player().onGround) {
                 state.setInput(Input.SNEAK, false);
@@ -106,7 +107,7 @@ public class MovementFall extends Movement {
 
         Vec3 destCenterOffset = new Vec3(destCenter.xCoord + 0.125 * avoid.getX(), destCenter.yCoord - 0.5, destCenter.zCoord + 0.125 * avoid.getZ());
         MovementHelper.rotate(ctx, state, src, destCenterOffset);
-        MovementHelper.setInputs(ctx, state, destCenterOffset);
+        MovementHelper.setInputsAccurate(ctx, state, destCenterOffset);
         //TODO:  move towards destCenterOffset
 
         return state;

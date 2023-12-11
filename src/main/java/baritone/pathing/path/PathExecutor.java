@@ -14,6 +14,7 @@ import baritone.pathing.calc.AbstractNodeCostSearch;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
+import baritone.pathing.movement.MovementState;
 import baritone.pathing.movement.movements.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3i;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static baritone.api.pathing.movement.MovementStatus.*;
@@ -436,8 +438,12 @@ public class PathExecutor implements IPathExecutor, Helper {
                     return true;
                 }
                 clearKeys();
-                behavior.baritone.getLookBehavior().updateTarget(RotationUtils.calcRotationFromVec3d(ctx.playerHead(), data.getFirst(), ctx.playerRotations()), false);
-                behavior.baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, true);
+                behavior.baritone.getLookBehavior().updateTarget(RotationUtils.calcRotationFromVec3d(ctx.playerHead(), data.getFirst(), ctx.playerRotations()).withPitch(ctx.playerRotations().getPitch()), false);
+                MovementState state = new MovementState();
+                MovementHelper.setInputsAccurate(ctx, state, data.getFirst());
+                for (Map.Entry<Input, Boolean> inputState : state.getInputStates().entrySet()) {
+                    behavior.baritone.getInputOverrideHandler().setInputForceState(inputState.getKey(), inputState.getValue());
+                }
                 return true;
             }
         }
