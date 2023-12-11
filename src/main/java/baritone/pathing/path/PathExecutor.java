@@ -90,7 +90,8 @@ public class PathExecutor implements IPathExecutor, Helper {
 
         boolean isInJumpBoost = ctx.player().getActivePotionEffects() != null
                 && ctx.player().getActivePotionEffect(Potion.jump) != null
-                && ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0 && !ctx.player().onGround;
+                && ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0
+                && !ctx.player().onGround;
 
         if (!isInJumpBoost && possiblyOffPath(status, BaritoneAPI.getSettings().maxDistFromPath.value)) {
             ticksAway++;

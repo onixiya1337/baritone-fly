@@ -104,7 +104,10 @@ public class MovementAscend extends Movement {
             return state;
         }
 
-        boolean isInJumpBoost = ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0 && !ctx.player().onGround;
+        boolean isInJumpBoost = ctx.player().getActivePotionEffects() != null
+                && ctx.player().getActivePotionEffect(Potion.jump) != null
+                && ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0
+                && !ctx.player().onGround;
 
         if (ctx.playerFeet().equals(dest) || ctx.playerFeet().equals(dest.add(getDirection().down()))) {
             if (!isInJumpBoost) {
