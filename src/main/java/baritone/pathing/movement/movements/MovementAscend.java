@@ -14,9 +14,9 @@ import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
 
@@ -104,8 +104,12 @@ public class MovementAscend extends Movement {
             return state;
         }
 
+        boolean isInJumpBoost = ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0 && !ctx.player().onGround;
+
         if (ctx.playerFeet().equals(dest) || ctx.playerFeet().equals(dest.add(getDirection().down()))) {
-            return state.setStatus(MovementStatus.SUCCESS);
+            if (!isInJumpBoost) {
+                return state.setStatus(MovementStatus.SUCCESS);
+            }
         }
 
         Vec3 destCenter = VecUtils.getBlockPosCenter(dest).subtract(0, 0.5, 0);
@@ -113,14 +117,16 @@ public class MovementAscend extends Movement {
                 destCenter,
                 ctx.playerRotations()).withPitch(ctx.playerRotations().getPitch());
 
-        state.setTarget(new MovementState.MovementTarget(target, false));
+        if (!isInJumpBoost) {
+            state.setTarget(new MovementState.MovementTarget(target, false));
+        }
 
         Rotation nextRotation = baritone.getLookBehavior().getAimProcessor().interpolate(ctx.playerRotations(), target);
         float deltaYaw = nextRotation.subtract(target).normalize().getYaw();
         if (Math.abs(deltaYaw) <= Baritone.settings().randomLooking.value + Baritone.settings().randomLooking113.value + Baritone.settings().maxYawOffsetForForward.value) {
             state.setInput(Input.MOVE_FORWARD, true);
         } else {
-            MovementHelper.setInputsAccurate(ctx, state, VecUtils.getBlockPosCenter(src).addVector(getDirection().getX() * 0.4, 0, getDirection().getZ() * 0.4));
+            MovementHelper.setInputsAccurate(ctx, state, VecUtils.getBlockPosCenter(src).addVector(getDirection().getX() * 0.42, 0, getDirection().getZ() * 0.42));
         }
         //TODO: Move towards dest
 

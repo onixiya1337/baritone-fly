@@ -15,9 +15,7 @@ import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.movements.*;
-import baritone.utils.BlockStateInterface;
-import baritone.utils.InputOverrideHandler;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
@@ -87,7 +85,10 @@ public class PathExecutor implements IPathExecutor, Helper {
             }
         }
         Tuple<Double, BlockPos> status = closestPathPos(path);
-        if (possiblyOffPath(status, BaritoneAPI.getSettings().maxDistFromPath.value)) {
+
+        boolean isInJumpBoost = ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0 && !ctx.player().onGround;
+
+        if (!isInJumpBoost && possiblyOffPath(status, BaritoneAPI.getSettings().maxDistFromPath.value)) {
             ticksAway++;
             System.out.println("FAR AWAY FROM PATH FOR " + ticksAway + " TICKS. Current distance: " + status.getFirst() + ". Threshold: " +  BaritoneAPI.getSettings().maxDistFromPath.value);
             if (ticksAway > MAX_TICKS_AWAY) {
@@ -98,7 +99,7 @@ public class PathExecutor implements IPathExecutor, Helper {
         } else {
             ticksAway = 0;
         }
-        if (possiblyOffPath(status, BaritoneAPI.getSettings().maxMaxDistFromPath.value)) {
+        if (!isInJumpBoost && possiblyOffPath(status, BaritoneAPI.getSettings().maxDistFromPath.value)) {
             logDebug("too far from path");
             cancel();
             return false;
@@ -492,6 +493,9 @@ public class PathExecutor implements IPathExecutor, Helper {
 
     private static boolean sprintableAscend(IPlayerContext ctx, MovementTraverse current, MovementAscend next, IMovement nextnext) {
         if (!Baritone.settings().sprintAscends.value) {
+            return false;
+        }
+        if (ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0) {
             return false;
         }
         if (!current.getDirection().equals(next.getDirection().down())) {
