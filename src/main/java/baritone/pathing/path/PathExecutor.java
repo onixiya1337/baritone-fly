@@ -16,7 +16,9 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.pathing.movement.movements.*;
-import net.minecraft.potion.Potion;
+import baritone.utils.BlockStateInterface;
+import baritone.utils.InputOverrideHandler;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
@@ -30,6 +32,8 @@ import static baritone.api.pathing.movement.MovementStatus.*;
 
 public class PathExecutor implements IPathExecutor, Helper {
 
+    private static final double MAX_MAX_DIST_FROM_PATH = 3;
+    private static final double MAX_DIST_FROM_PATH = 2;
     private static final double MAX_TICKS_AWAY = 200;
 
     private final IPath path;
@@ -87,15 +91,9 @@ public class PathExecutor implements IPathExecutor, Helper {
             }
         }
         Tuple<Double, BlockPos> status = closestPathPos(path);
-
-        boolean isInJumpBoost = ctx.player().getActivePotionEffects() != null
-                && ctx.player().getActivePotionEffect(Potion.jump) != null
-                && ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0
-                && !ctx.player().onGround;
-
-        if (!isInJumpBoost && possiblyOffPath(status, BaritoneAPI.getSettings().maxDistFromPath.value)) {
+        if (possiblyOffPath(status, MAX_DIST_FROM_PATH)) {
             ticksAway++;
-            System.out.println("FAR AWAY FROM PATH FOR " + ticksAway + " TICKS. Current distance: " + status.getFirst() + ". Threshold: " +  BaritoneAPI.getSettings().maxDistFromPath.value);
+            System.out.println("FAR AWAY FROM PATH FOR " + ticksAway + " TICKS. Current distance: " + status.getFirst() + ". Threshold: " + MAX_DIST_FROM_PATH);
             if (ticksAway > MAX_TICKS_AWAY) {
                 logDebug("Too far away from path for too long, cancelling path");
                 cancel();
@@ -104,7 +102,7 @@ public class PathExecutor implements IPathExecutor, Helper {
         } else {
             ticksAway = 0;
         }
-        if (!isInJumpBoost && possiblyOffPath(status, BaritoneAPI.getSettings().maxDistFromPath.value)) {
+        if (possiblyOffPath(status, MAX_MAX_DIST_FROM_PATH)) {
             logDebug("too far from path");
             cancel();
             return false;
@@ -502,9 +500,6 @@ public class PathExecutor implements IPathExecutor, Helper {
 
     private static boolean sprintableAscend(IPlayerContext ctx, MovementTraverse current, MovementAscend next, IMovement nextnext) {
         if (!Baritone.settings().sprintAscends.value) {
-            return false;
-        }
-        if (ctx.player().getActivePotionEffect(Potion.jump).getAmplifier() > 0) {
             return false;
         }
         if (!current.getDirection().equals(next.getDirection().down())) {
