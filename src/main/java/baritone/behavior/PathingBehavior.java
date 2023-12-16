@@ -95,6 +95,12 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
     }
 
     private void tickPath() {
+        // check if player inventory is opened
+        if (ctx.player().openContainer != ctx.player().inventoryContainer) {
+            baritone.getInputOverrideHandler().clearAllKeys();
+            baritone.getInputOverrideHandler().getBlockBreakHelper().stopBreakingBlock();
+            return;
+        }
         pausedThisTick = false;
         if (pauseRequestedLastTick && safeToCancel) {
             pauseRequestedLastTick = false;
